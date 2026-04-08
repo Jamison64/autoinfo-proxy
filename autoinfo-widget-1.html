@@ -1,0 +1,435 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WF-BC-AutoInfo-Integration</title>
+<link rel="stylesheet" href="https://autoinfo.westernfilters.net.au/lib/bootstrap/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://autoinfo.westernfilters.net.au/css/site.css?v=jGsuJezsdYc6s6st6n0jR1GBcWdfrB09lib0Tpd2yx4">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+</head>
+
+<body>
+<div class="container">
+        <main role="main" class="pb-3">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAAkl_Q8sYLqILRQX" data-callback="getTurnstileToken" data-theme="light" data-appearance="interaction-only" data-size="flexible"><div><input type="hidden" name="cf-turnstile-response" id="cf-chl-widget-uc88h_response" value=""></div></div>
+            <div id="cf-turnstile-alert" class="alert alert-danger hidden small">Check the box above</div>
+            
+<nav>
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <a class="nav-link active" id="nav-vehicle-tab" data-toggle="tab" href="#nav-vehicle" role="tab" aria-controls="nav-vehicle" aria-selected="true">Vehicle Search</a>
+        <a class="nav-link" id="nav-part-number-tab" data-toggle="tab" href="#nav-part-number" role="tab" aria-controls="nav-part-number" aria-selected="false">Part Number Search</a>
+    </div>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+    <div class="tab-pane fade show active" id="nav-vehicle" role="tabpanel" aria-labelledby="nav-vehicle-tab">
+        <div class="container">
+    <div class="form-group my-4">
+
+        <div class="row">
+            <div class="col-md-3 col-sm-12">
+                <input id="plate" type="text" placeholder="Enter Plate Number" class="form-control required" maxlength="7">
+                <div id="plate-alert" class="alert alert-danger hidden small">This field is required</div>
+                <div id="forbidden-char-alert" class="alert alert-danger hidden small">Only letters and numbers allowed</div>
+            </div>
+            <div class="col-md-3 col-sm-12">
+                <select title="place" id="place" class="form-control required">
+                    <option value="">-- Select a state --</option>
+                    <option value="AU-ACT">ACT</option>
+                    <option value="AU-NSW">NSW</option>
+                    <option value="AU-NT">NT</option>
+                    <option value="AU-QLD">QLD</option>
+                    <option value="AU-SA">SA</option>
+                    <option value="AU-TAS">TAS</option>
+                    <option value="AU-VIC">VIC</option>
+                    <option value="AU-WA">WA</option>
+                    <option value="NZ-">NEW ZEALAND</option>
+                </select>
+                <div id="place-alert" class="alert alert-danger hidden small">This field is required</div>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <button id="search-plate" class="btn btn-primary">
+                    <span id="search-button-text">SEARCH</span>
+                    <div id="search-button-spinner" class="spinner-border hidden" style="width:1rem;height:1rem; role=" status"="">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </button>
+                <button id="reset-plate" class="btn btn btn-secondary">CLEAR</button>
+            </div>
+        </div>
+
+        <div id="no-plate-result" class="alert alert-warning hidden" role="alert">
+            <span>No result found for that license plate.</span>
+        </div>
+        <div id="vehicle-selection">
+            <div class="row">
+                <!--Vehicle Type-->
+                <div class="col-md-2 col-sm-12">
+                    <label>MAKE</label>
+
+
+                    <input type="text" title="make" id="make-filter" value="" class="form-control search" data-target="#make" placeholder="" disabled="disabled">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <div id="make-spinner" class="spinner-border" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="select-list" id="make" data-return-field="make" data-next-field="model"></div>
+
+                </div>
+
+                <!--Vehicle Model-->
+                <div class="col-md-2 col-sm-12">
+                    <label>MODEL</label>
+
+
+                    <input type="text" title="model" id="model-filter" value="" class="form-control search" data-target="#model" placeholder="" disabled="">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <div id="model-spinner" class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="select-list" id="model" data-return-field="model" data-next-field="year"></div>
+
+                </div>
+
+                <!--Vehicle Type-->
+                <div class="col-md-2 col-sm-12">
+                    <label>YEAR</label>
+
+
+                    <input type="text" title="year" id="year-filter" value="" class="form-control search" data-target="#year" placeholder="" disabled="">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <div id="year-spinner" class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="select-list" id="year" data-return-field="year" data-next-field="seriesChassis"></div>
+                </div>
+
+                <!--Vehicle Type-->
+                <div class="col-md-2 col-sm-12">
+                    <label>CHASSIS</label>
+
+
+                    <input type="text" title="seriesChassis" id="seriesChassis-filter" value="" class="form-control search" data-target="#seriesChassis" placeholder="" disabled="">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <div id="seriesChassis-spinner" class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="select-list" id="seriesChassis" data-return-field="seriesChassis" data-next-field="engine"></div>
+                </div>
+
+                <!--Vehicle Type-->
+                <div class="col-md-2 col-sm-12">
+                    <label>ENGINE</label>
+
+
+                    <input type="text" title="engine" id="engine-filter" value="" class="form-control search" data-target="#engine" placeholder="" disabled="">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <div id="engine-spinner" class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="select-list" id="engine" data-return-field="engine" data-next-field="details"></div>
+                </div>
+
+                <!--Vehicle Type-->
+                <div class="col-md-2 col-sm-12">
+                    <label>DETAILS</label>
+
+
+                    <input type="text" title="details" id="details-filter" value="" class="form-control search" data-target="#details" placeholder="" disabled="">
+
+                    <div class="d-flex justify-content-center my-3">
+                        <div id="details-spinner" class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="select-list" id="details" data-return-field="details" data-next-field="final-vehicle"></div>
+                </div>
+            </div>
+
+            <div>
+                <button type="button" id="clear-select-list" class="btn btn-primary">CLEAR</button>
+            </div>
+        </div>
+
+    </div>
+    <div id="multiple-results" class="hidden">
+        <h2>Please select your vehicle:</h2>
+        <div id="result-options" data-next-field="final-vehicle">
+
+        </div>
+
+    </div>
+    <div id="final-result" class="alert alert-success hidden" role="alert">
+        <strong>Selected vehicle: </strong><span id="final-vehicle" data-vehicle-id=""></span>
+        <input type="hidden" id="final-vehicle-id" value="">
+    </div>
+
+</div>
+
+            <div class="container">
+        <div id="vehicle-search-error" class="alert alert-danger" role="alert">
+            <span>Some unexpected error happened for that request. Please try again in a few seconds.</span>
+        </div>
+        <div id="no-vehicle-parts-found" class="alert alert-warning hidden" role="alert">
+            <span>No parts found for this vehicle.</span>
+        </div>
+        <div class="d-flex justify-content-center ">
+            <div id="search-result-spinner" class="spinner-border hidden" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div class="row">
+            <div id="search-filters-mobile" class="col-sm-12">
+                <button class="btn btn-secondary" data-toggle="collapse" data-target="#collapseFilters" aria-expanded="false" aria-controls="collapseFilters">FILTER BY</button>
+                <div id="collapseFilters" class="refine-wrapper collapse">
+                    <p class="my-1 filter-header">FILTER BY</p>
+                    <br>
+                    <p id="show-all" class="my-1 filter-option selected" data-option="0">Show All</p>
+                    <p id="catch-cans" class="my-1 filter-option" data-option="1">Catch Cans</p>
+                    <p id="filters" class="my-1 filter-option" data-option="2">Filters</p>
+                    <p id="belts-tensioner" class="my-1 filter-option" data-option="3">Belts &amp; Tensioners</p>
+                    <p id="oils" class="my-1 filter-option" data-option="4">Oils</p>
+                    <p id="accessories" class="my-1 filter-option" data-option="5">Accessories</p>
+                </div>
+            </div>
+            <div id="search-filters" class="col-md-2 hidden">
+                <div id="filter-bar">
+                    <p class="my-1 filter-header">FILTER BY</p>
+                    <br>
+                    <p id="show-all" class="my-1 filter-option selected" data-option="0">Show All</p>
+                    <p id="catch-cans" class="my-1 filter-option" data-option="1">Catch Cans</p>
+                    <p id="filters" class="my-1 filter-option" data-option="2">Filters</p>
+                    <p id="belts-tensioner" class="my-1 filter-option" data-option="3">Belts &amp; Tensioners</p>
+                    <p id="oils" class="my-1 filter-option" data-option="4">Oils</p>
+                    <p id="accessories" class="my-1 filter-option" data-option="5">Accessories</p>
+                </div>
+            </div>
+            <div id="results" class="col-md col-sm-12">
+                <div id="search-result" class="container hidden">
+                    <div id="search-result-header" class="row">
+                        <div class="col-2">
+                            <p><strong>IMAGE</strong></p>
+                        </div>
+                        <div class="col-2">
+                            <p><strong>SKU</strong></p>
+                        </div>
+                        <div class="col-3">
+                            <p><strong>DESCRIPTION</strong></p>
+                        </div>
+                        <div class="col-1">
+                            <p><strong>PRICE</strong></p>
+                        </div>
+                        <div class="col-2">
+                            <p><strong>IN-STOCK</strong></p>
+                        </div>
+                        <div class="col-2">
+
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center ">
+                        <div id="search-result-page-spinner" class="spinner-border hidden" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <div id="search-result-list" class="row">
+                        <div class="search-result-item-sample col-12-md col-xs-6 shadow-sm p-3 mb-5 bg-white rounded hidden">
+                            <div class="row">
+                                <div class="col-md-2 col-xs-12 part-image">
+                                    <a href="#" title="Product page" target="_blank"><img src="/web/20250311012529im_/https://autoinfo.westernfilters.net.au/images/no-image-found.png" title="part-image" alt="Product Image" class="img-fluid"></a>
+                                </div>
+                                <div class="col-md-2 col-xs-12 part-code">
+
+                                </div>
+                                <div class="col-md-3 col-xs-12 part-note">
+
+                                </div>
+                                <div class="col-md-1 col-xs-6 part-price">
+                                    <span>$</span><span class="part-price-value"></span>
+                                </div>
+                                <div class="col-md-2 col-xs-6 part-status">
+
+                                </div>
+                                <div class="col-md-2 col-xs-12 part-add-to-cart">
+                                    <button class="btn btn-info add-to-cart">
+                                        <span class="add-to-cart-text">ADD TO CART</span>
+
+                                        <div class="spinner-border add-to-cart-button-spinner hidden" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <nav aria-label="Page navigation example">
+        <ul id="vehicle-search-pagination" class="pagination justify-content-center hidden">
+            <li id="first" class="page-item disabled hidden">
+                <a class="page-link" href="#">First</a>
+            </li>
+            
+            <li id="last" class="page-item disabled hidden">
+                <a class="page-link" href="#">Last</a>
+            </li>
+        </ul>
+    </nav>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+    <div class="tab-pane fade" id="nav-part-number" role="tabpanel" aria-labelledby="nav-part-number-tab">
+            <div class="container">
+        <div class="form-group my-4">
+
+            <div class="row">
+                <div class="col-md-3 col-sm-12">
+                    <input id="partnumber" type="text" placeholder="Enter Part Number" class="form-control required" maxlength="15">
+                    <div id="part-number-alert" class="alert alert-danger hidden small">This field is required</div>
+                    <div id="forbidden-char-alert-partno" class="alert alert-danger hidden small">Only letters, numbers, "-" and "/" allowed</div>
+                </div>
+
+                <div class="col-md-6 col-sm-12">
+                    <button id="search-part-number" class="btn btn-primary">SEARCH</button>
+                    <button id="reset-part-number" class="btn btn btn-secondary">CLEAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <div class="container">
+        <div id="part-search-error" class="alert alert-danger hidden" role="alert">
+            <span>Some unexpected error happened for that request. Please try again in a few seconds.</span>
+        </div>
+        <div id="no-part-found" class="alert alert-warning hidden" role="alert">
+            <span>No parts found for this search.</span>
+        </div>
+        <div class="d-flex justify-content-center ">
+            <div id="part-search-result-spinner" class="spinner-border hidden" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div id="part-search-result" class="container hidden">
+            <div id="part-search-result-header" class="row">
+                <div class="col-2">
+                    <p><strong>IMAGE</strong></p>
+                </div>
+                <div class="col-2">
+                    <p><strong>SKU</strong></p>
+                </div>
+                <div class="col-3">
+                    <p><strong>DESCRIPTION</strong></p>
+                </div>
+                <div class="col-1">
+                    <p><strong>PRICE</strong></p>
+                </div>
+                <div class="col-2">
+                    <p><strong>IN-STOCK</strong></p>
+                </div>
+                <div class="col-2">
+
+                </div>
+            </div>
+            <div class="d-flex justify-content-center ">
+                <div id="part-search-page-result-spinner" class="spinner-border hidden" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+            <div id="part-search-result-list" class="row">
+                <div class="part-search-result-item-sample col-12-md col-xs-6 shadow-sm p-3 mb-5 bg-white rounded hidden">
+                    <div class="row">
+                        <div class="col-md-2 col-xs-12 part-image">
+                            <a href="#" title="product-page" target="_blank"><img src="/web/20250311012529im_/https://autoinfo.westernfilters.net.au/images/no-image-found.png" title="part-image" alt="Product Image" class="img-fluid"></a>
+                        </div>
+                        <div class="col-md-2 col-xs-12 part-code">
+
+                        </div>
+                        <div class="col-md-3 col-xs-12 part-note">
+
+                        </div>
+                        <div class="col-md-1 col-xs-6 part-price">
+                            <span>$</span><span class="part-price-value"></span>
+                        </div>
+                        <div class="col-md-2 col-xs-6 part-status">
+
+                        </div>
+                        <div class="col-md-2 col-xs-12 part-add-to-cart">
+                            <button class="btn btn-info add-to-cart w-100">ADD TO CART</button>
+                            <button class="btn btn-info select-part-button w-100 text-center" data-gtin="">VEHICLE APPLICATION</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            <li id="first-part-number-page" class="page-item hidden">
+                <a class="page-link part-number-page" href="#">First</a>
+            </li>
+
+            <li id="last-part-number-page" class="page-item hidden">
+                <a class="page-link part-number-page" href="#">Last</a>
+            </li>
+        </ul>
+    </nav>
+
+        </div>
+            <div id="vehicle-fitment" class="hidden">
+        <h2>Vehicle Application</h2>
+        <div class="d-flex justify-content-center ">
+            <div id="vehicle-fitments-spinner" class="spinner-border hidden" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div id="vehicle-fitments-images">
+            <div id="no-vehicle-fitments-found" class="alert alert-warning hidden" role="alert">
+                <span>No vehicle fitments found for this product.</span>
+            </div>
+        </div>
+        <nav id="vehicle-fitment-pagination" class="hidden">
+            <ul id="vehicle-fitment-footer" class="pagination ">
+                <li id="first-vehicle-fitment-page" class="page-item ">
+                    <button id="prev" class="page-link vehicle-fitment-pagination">Previous</button>
+                </li>
+
+                <li id="last-vehicle-fitment-page" class="page-item ">
+                    <button id="next" class="page-link vehicle-fitment-pagination">Next</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    </div>
+
+    </div>
+
+</div>
+
+            <div class="modal fade" id="WFModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                    <div class="modal-content text-center">
+                        <div class="d-flex justify-content-center">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/web/20250311012529js_/https://autoinfo.westernfilters.net.au/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/web/20250311012529js_/https://autoinfo.westernfilters.net.au/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/web/20250311012529js_/https://autoinfo.westernfilters.net.au/js/site.js?v=Dr1THvkOm7jDTXiU4NV22u7xQP3r5eDFszFcB8EYV9k"></script>
+</body>
+</html>
