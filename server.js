@@ -7,7 +7,14 @@ const PORT = process.env.PORT || 3000;
 const USER_ID = "17292";
 const AUTH_CODE = "LY9-P98-KK2";
 
-function getMakes() {
+function vehicleQuery(
+  returnField,
+  make = "",
+  model = "",
+  year = "",
+  seriesChassis = "",
+  engine = "",
+) {
   return new Promise((resolve, reject) => {
     const soapBody = `<?xml version="1.0" encoding="utf-8"?>
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://autoi.com.au/">
@@ -15,12 +22,12 @@ function getMakes() {
     <tns:VehicleQueryD>
       <tns:UserID>${USER_ID}</tns:UserID>
       <tns:AuthCode>${AUTH_CODE}</tns:AuthCode>
-      <tns:ReturnField>Make</tns:ReturnField>
-      <tns:Make></tns:Make>
-      <tns:Model></tns:Model>
-      <tns:Year></tns:Year>
-      <tns:SeriesChassis></tns:SeriesChassis>
-      <tns:Engine></tns:Engine>
+      <tns:ReturnField>${returnField}</tns:ReturnField>
+      <tns:Make>${make}</tns:Make>
+      <tns:Model>${model}</tns:Model>
+      <tns:Year>${year}</tns:Year>
+      <tns:SeriesChassis>${seriesChassis}</tns:SeriesChassis>
+      <tns:Engine>${engine}</tns:Engine>
       <tns:AU>true</tns:AU>
       <tns:NZ>true</tns:NZ>
       <tns:PA>true</tns:PA>
@@ -68,11 +75,11 @@ function parseVehicleResults(xml) {
           result["soap:Envelope"]["soap:Body"]["VehicleQueryDResponse"][
             "VehicleQueryDResult"
           ]["VehicleResult"]["VehicleResult"];
-        const makes = results.map((item) => ({
+        const items = results.map((item) => ({
           text: item.SelectText,
           vehicleId: item.VehicleId,
         }));
-        resolve(makes);
+        resolve(items);
       } catch (e) {
         reject(new Error("Failed to parse XML structure: " + e.message));
       }
@@ -81,7 +88,11 @@ function parseVehicleResults(xml) {
 }
 
 const server = http.createServer(async (req, res) => {
-  if (req.url === "/myip") {
+  const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
+  const path = parsedUrl.pathname;
+  const params = parsedUrl.searchParams;
+
+  if (path === "/myip") {
     https.get("https://api.ipify.org?format=json", (apiRes) => {
       let data = "";
       apiRes.on("data", (chunk) => (data += chunk));
@@ -90,12 +101,23 @@ const server = http.createServer(async (req, res) => {
         res.end(data);
       });
     });
-  } else if (req.url === "/makes") {
+  } else if (path === "/makes") {
     try {
-      const xml = await getMakes();
+      const xml = await vehicleQuery("Make");
       const makes = await parseVehicleResults(xml);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(makes));
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+  } else if (path === "/models") {
+    const make = params.get("make") || "";
+    try {
+      const xml = await vehicleQuery("Model", make);
+      const models = await parseVehicleResults(xml);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(models));
     } catch (err) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
