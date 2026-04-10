@@ -140,9 +140,9 @@ const server = http.createServer(async (req, res) => {
     const year = params.get("year") || "";
     try {
       const xml = await vehicleQuery("SeriesChassis", make, model, year);
-      const seriesChassis = await parseVehicleResults(xml);
+      const series = await parseVehicleResults(xml);
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(seriesChassis));
+      res.end(JSON.stringify(series));
     } catch (err) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
@@ -163,6 +163,28 @@ const server = http.createServer(async (req, res) => {
       const engines = await parseVehicleResults(xml);
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(engines));
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+  } else if (path === "/details") {
+    const make = params.get("make") || "";
+    const model = params.get("model") || "";
+    const year = params.get("year") || "";
+    const seriesChassis = params.get("seriesChassis") || "";
+    const engine = params.get("engine") || "";
+    try {
+      const xml = await vehicleQuery(
+        "Details",
+        make,
+        model,
+        year,
+        seriesChassis,
+        engine,
+      );
+      const details = await parseVehicleResults(xml);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(details));
     } catch (err) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
