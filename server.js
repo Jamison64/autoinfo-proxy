@@ -122,6 +122,51 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
     }
+  } else if (path === "/years") {
+    const make = params.get("make") || "";
+    const model = params.get("model") || "";
+    try {
+      const xml = await vehicleQuery("Year", make, model);
+      const years = await parseVehicleResults(xml);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(years));
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+  } else if (path === "/serieschassis") {
+    const make = params.get("make") || "";
+    const model = params.get("model") || "";
+    const year = params.get("year") || "";
+    try {
+      const xml = await vehicleQuery("SeriesChassis", make, model, year);
+      const seriesChassis = await parseVehicleResults(xml);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(seriesChassis));
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+  } else if (path === "/engine") {
+    const make = params.get("make") || "";
+    const model = params.get("model") || "";
+    const year = params.get("year") || "";
+    const seriesChassis = params.get("seriesChassis") || "";
+    try {
+      const xml = await vehicleQuery(
+        "Engine",
+        make,
+        model,
+        year,
+        seriesChassis,
+      );
+      const engines = await parseVehicleResults(xml);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(engines));
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "AutoInfo Proxy Running" }));
