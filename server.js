@@ -9,21 +9,28 @@ const AUTH_CODE = "LY9-P98-KK2";
 function getMakes() {
   return new Promise((resolve, reject) => {
     const soapBody = `<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tns="http://autoi.com.au/">
   <soap:Body>
-    <VehicleQueryD xmlns="http://autoi.com.au/">
-      <UserId>${USER_ID}</UserId>
-      <AuthCode>${AUTH_CODE}</AuthCode>
-      <UserCookie></UserCookie>
-      <MakeId>0</MakeId>
-      <ModelId>0</ModelId>
-      <YearId>0</YearId>
-      <SeriesId>0</SeriesId>
-      <BodyId>0</BodyId>
-      <EngineId>0</EngineId>
-      <AU>true</AU>
-      <NZ>true</NZ>
-    </VehicleQueryD>
+    <tns:VehicleQueryD>
+      <tns:UserID>${USER_ID}</tns:UserID>
+      <tns:AuthCode>${AUTH_CODE}</tns:AuthCode>
+      <tns:ReturnField>Make</tns:ReturnField>
+      <tns:Make></tns:Make>
+      <tns:Model></tns:Model>
+      <tns:Year></tns:Year>
+      <tns:SeriesChassis></tns:SeriesChassis>
+      <tns:Engine></tns:Engine>
+      <tns:AU>true</tns:AU>
+      <tns:NZ>true</tns:NZ>
+      <tns:PA>true</tns:PA>
+      <tns:LC>true</tns:LC>
+      <tns:MC>false</tns:MC>
+      <tns:HC>false</tns:HC>
+      <tns:SeriesCheck>false</tns:SeriesCheck>
+      <tns:ChassisCheck>false</tns:ChassisCheck>
+      <tns:CallingIPAddress></tns:CallingIPAddress>
+      <tns:UserCookie></tns:UserCookie>
+    </tns:VehicleQueryD>
   </soap:Body>
 </soap:Envelope>`;
 
