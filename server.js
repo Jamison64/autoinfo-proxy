@@ -28,8 +28,9 @@ function getMakes() {
       <tns:HC>false</tns:HC>
       <tns:SeriesCheck>false</tns:SeriesCheck>
       <tns:ChassisCheck>false</tns:ChassisCheck>
-      <tns:CallingIPAddress></tns:CallingIPAddress>
+      <tns:CallingIPAddress>1.1.1.1</tns:CallingIPAddress>
       <tns:UserCookie></tns:UserCookie>
+      <tns:UserAccount>Debtor123</tns:UserAccount>
     </tns:VehicleQueryD>
   </soap:Body>
 </soap:Envelope>`;
