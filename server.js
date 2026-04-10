@@ -142,11 +142,8 @@ function parsePartsResults(xml) {
         const recordsReturned = response["RecordsReturned"];
         const recordsAvailable = response["RecordsAvailable"];
         let parts = [];
-        if (
-          response["PartsListing"] &&
-          response["PartsListing"]["PartsListingType"]
-        ) {
-          const raw = response["PartsListing"]["PartsListingType"];
+        if (response["Parts"] && response["Parts"]["PartsListing"]) {
+          const raw = response["Parts"]["PartsListing"];
           const list = Array.isArray(raw) ? raw : [raw];
           parts = list.map((item) => ({
             sku: item.SKU,
