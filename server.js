@@ -1,5 +1,6 @@
 const http = require("http");
 const https = require("https");
+const xml2js = require("xml2js");
 
 const PORT = process.env.PORT || 3000;
 
@@ -58,6 +59,27 @@ function getMakes() {
   });
 }
 
+function parseVehicleResults(xml) {
+  return new Promise((resolve, reject) => {
+    xml2js.parseString(xml, { explicitArray: false }, (err, result) => {
+      if (err) return reject(err);
+      try {
+        const results =
+          result["soap:Envelope"]["soap:Body"]["VehicleQueryDResponse"][
+            "VehicleQueryDResult"
+          ]["VehicleResult"]["VehicleResult"];
+        const makes = results.map((item) => ({
+          text: item.SelectText,
+          vehicleId: item.VehicleId,
+        }));
+        resolve(makes);
+      } catch (e) {
+        reject(new Error("Failed to parse XML structure: " + e.message));
+      }
+    });
+  });
+}
+
 const server = http.createServer(async (req, res) => {
   if (req.url === "/myip") {
     https.get("https://api.ipify.org?format=json", (apiRes) => {
@@ -71,8 +93,9 @@ const server = http.createServer(async (req, res) => {
   } else if (req.url === "/makes") {
     try {
       const xml = await getMakes();
-      res.writeHead(200, { "Content-Type": "application/xml" });
-      res.end(xml);
+      const makes = await parseVehicleResults(xml);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(makes));
     } catch (err) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
