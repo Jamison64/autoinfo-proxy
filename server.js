@@ -284,6 +284,16 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: err.message }));
     }
+  } else if (path === "/parts-raw") {
+    const vehicleId = params.get("vehicleId") || "";
+    try {
+      const xml = await getParts(vehicleId);
+      res.writeHead(200, { "Content-Type": "application/xml" });
+      res.end(xml);
+    } catch (err) {
+      res.writeHead(500, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: err.message }));
+    }
   } else {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ status: "AutoInfo Proxy Running" }));
