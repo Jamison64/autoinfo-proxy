@@ -7,6 +7,25 @@ const PORT = process.env.PORT || 3000;
 const USER_ID = "17292";
 const AUTH_CODE = "LY9-P98-KK2";
 
+/* ============================================================
+   CORS — allowed origins
+============================================================ */
+const ALLOWED_ORIGINS = [
+  "http://127.0.0.1:5500",
+  "http://localhost:5500",
+  "https://www.westernfilters.com.au",
+  "https://westernfilters.com.au",
+];
+
+function setCORSHeaders(req, res) {
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
 function vehicleQuery(
   returnField,
   make = "",
@@ -170,6 +189,17 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://localhost:${PORT}`);
   const path = parsedUrl.pathname;
   const params = parsedUrl.searchParams;
+
+  // Handle CORS preflight
+  if (req.method === "OPTIONS") {
+    setCORSHeaders(req, res);
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  // Set CORS headers on all responses
+  setCORSHeaders(req, res);
 
   if (path === "/myip") {
     https.get("https://api.ipify.org?format=json", (apiRes) => {
