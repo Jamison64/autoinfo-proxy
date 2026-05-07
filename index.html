@@ -1,0 +1,247 @@
+<div class="wf-rego-bar">
+
+  <!-- ROW 1: dark title band -->
+  <div class="wf-rego-header">
+    <span class="wf-rego-header__text">
+      FIND MY VEHICLE<span class="wf-rego-header__sep"> </span>
+      <span class="wf-rego-header__sub">: Enter your REGO to view Vehicle Specific Parts :</span>
+    </span>
+  </div>
+
+  <!-- ROW 2: light input band -->
+  <div class="wf-rego-fields">
+    <div class="wf-rego-fields__inner">
+      <input
+        type="text"
+        id="plate"
+        placeholder="REGO Number"
+        maxlength="10"
+        autocomplete="off"
+        autocapitalize="characters"
+      />
+      <select title="place" id="place">
+        <option value="">Select your State</option>
+        <option value="AU-ACT">ACT</option>
+        <option value="AU-NSW">NSW</option>
+        <option value="AU-NT">NT</option>
+        <option value="AU-QLD">QLD</option>
+        <option value="AU-SA">SA</option>
+        <option value="AU-TAS">TAS</option>
+        <option value="AU-VIC">VIC</option>
+        <option value="AU-WA">WA</option>
+        <option value="NZ-">NEW ZEALAND</option>
+      </select>
+      <button id="search-button" class="wf-btn-search">SEARCH / FIND</button>
+      <button id="clear-button" class="wf-btn-clear">CLEAR</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const partsFinderUrl = "/find-my-vehicle.html";
+
+  let searchButton = document.querySelector("#search-button");
+  searchButton.addEventListener("click", (e) => {
+    let plate = document.querySelector("#plate").value.trim().toUpperCase();
+    let place = document.querySelector("#place").value;
+    let params = new URLSearchParams({
+      searchType: "regoSearch",
+      plate: plate,
+      place: place,
+    });
+    window.location.href = `${partsFinderUrl}?${params.toString()}`;
+  });
+
+  let clearButton = document.querySelector("#clear-button");
+  clearButton.addEventListener("click", (e) => {
+    document.querySelector("#plate").value = "";
+    document.querySelector("#place").value = "";
+    document.querySelector("#place").classList.remove("has-value");
+  });
+
+  document.querySelector("#place").addEventListener("change", (e) => {
+    e.target.classList.toggle("has-value", e.target.value !== "");
+  });
+
+  document.querySelector("#plate").addEventListener("input", (e) => {
+    e.target.value = e.target.value.replace(/[\s-]/g, '').toUpperCase();
+  });
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+
+  :root {
+    --wf-blue:     #138cc3;
+    --wf-blue-dk:  #1878a8;
+    --wf-clear:    #55869d;
+    --wf-clear-dk: #467388;
+    --wf-header:   #2d3035;
+    --wf-field-bg: #ccd9de;
+    --wf-white:    #ffffff;
+  }
+
+  /* Outer wrapper — negative margins match old widget's edge-to-edge bleed */
+  .wf-rego-bar {
+    margin: -4px -10.5px 0 -10.5px;
+  }
+
+  /* ── ROW 1: dark title band ───────────────────────────────────────────── */
+  .wf-rego-header {
+    background-color: var(--wf-header);
+    width: 100%;
+    text-align: center;
+    padding: 10px 20px 9px;
+  }
+  .wf-rego-header__text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    color: var(--wf-white);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .wf-rego-header__sub {
+    font-weight: 400;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  /* ── ROW 2: light input band ──────────────────────────────────────────── */
+  .wf-rego-fields {
+    background-color: var(--wf-field-bg);
+    width: 100%;
+    padding: 10px 20px;
+  }
+  .wf-rego-fields__inner {
+    max-width: 1570px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Input & select shared */
+  .wf-rego-fields #plate,
+  .wf-rego-fields #place {
+    box-sizing: border-box;
+    height: 42px;
+    background-color: var(--wf-white);
+    border: 1.5px solid #aec0c8;
+    border-radius: 5px;
+    font-size: 17px;
+    padding: 0 12px;
+    color: #333;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    text-align: center;
+  }
+  .wf-rego-fields #plate {
+    width: 160px;
+  }
+  .wf-rego-fields #plate::placeholder {
+    color: #999;
+  }
+  .wf-rego-fields #plate:focus,
+  .wf-rego-fields #place:focus {
+    border-color: var(--wf-blue);
+    box-shadow: 0 0 0 2px rgba(31, 139, 191, 0.2);
+  }
+  .wf-rego-fields #place {
+    width: 200px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23666' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+    color: #999;
+    text-align-last: center;
+    -moz-text-align-last: center;
+  }
+  .wf-rego-fields #place.has-value {
+    color: #333;
+  }
+
+  /* Buttons */
+  .wf-btn-search,
+  .wf-btn-clear {
+    box-sizing: border-box;
+    height: 42px;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    padding: 0 22px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    color: var(--wf-white);
+  }
+  .wf-btn-search { background-color: var(--wf-blue); }
+  .wf-btn-search:hover { background-color: var(--wf-blue-dk); }
+  .wf-btn-clear  { background-color: var(--wf-clear); }
+  .wf-btn-clear:hover  { background-color: var(--wf-clear-dk); }
+
+  /* ── Mobile ≤ 640px ───────────────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .wf-rego-bar {
+      margin: 0;
+    }
+    .wf-rego-header {
+      padding: 14px 16px 12px;
+    }
+    .wf-rego-header__text {
+      display: block;
+      font-size: 36px;
+      letter-spacing: 1px;
+      line-height: 1.1;
+      white-space: normal;
+    }
+    .wf-rego-header__sep { display: none; }
+    .wf-rego-header__sub {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+      letter-spacing: 0.3px;
+    }
+    .wf-rego-fields {
+      padding: 12px 12px 14px;
+    }
+    .wf-rego-fields__inner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .wf-rego-fields #plate,
+    .wf-rego-fields #place {
+      width: 100% !important;
+      height: 52px;
+      font-size: 19px;
+      text-align: center;
+      border: 1.5px solid #9ab4be;
+    }
+    .wf-rego-fields #place {
+      background-position: right 16px center;
+      padding-right: 40px;
+      padding-left: 40px;
+    }
+    .wf-btn-search,
+    .wf-btn-clear {
+      width: 100%;
+      height: 52px;
+      font-size: 19px;
+      letter-spacing: 1px;
+    }
+  }
+</style>

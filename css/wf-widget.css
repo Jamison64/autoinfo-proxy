@@ -1,0 +1,58 @@
+/* ============================================
+   WF WIDGET - STYLE GUIDE
+   Western Filters Brand CSS Custom Properties
+   ============================================ */
+
+:root {
+
+  /* --- Brand Colours --- */
+  --wf-blue:          #138cc3;
+  --wf-blue-hover:    #0e6e99;
+  --wf-dark:          #383e47;
+  --wf-green:         #70B00C;
+  --wf-grey:          #6e6e6e;
+  --wf-light-grey:    #f5f5f5;
+  --wf-border:        #dee2e6;
+  --wf-cyan-light:    #e0f7f7;
+  --wf-white:         #ffffff;
+  --wf-black:         #1a1a1a;
+
+  /* --- Typography --- */
+  --wf-font:          'Rajdhani', sans-serif;
+  --wf-font-size:     13px;
+  --wf-font-weight-normal:  400;
+  --wf-font-weight-semi:    600;
+  --wf-font-weight-bold:    700;
+
+  /* --- Layout --- */
+  --wf-container-max: 1600px;
+  --wf-radius:        5px;
+
+  /* --- Widget Specific --- */
+  --wf-panel-bg:      #2d2d2d;
+  --wf-panel-text:    #ffffff;
+  --wf-tab-active:    #ffffff;
+  --wf-tab-bg:        #383e47;
+  --wf-selected-bg:   var(--wf-cyan-light);
+  --wf-btn-search:    #138cc3;
+  --wf-btn-clear:     #383e47;
+  --wf-btn-clear-hover: #1a1a1a;
+
+}
+
+/* --- Google Font Import --- */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap');
+
+/* --- Base Widget Styles --- */
+body {
+  font-family:  var(--wf-font);
+  font-size:    var(--wf-font-size);
+  color:        var(--wf-dark);
+  background:   var(--wf-white);
+  line-height:  normal;
+}
+
+* {
+  box-sizing:     border-box;
+  border-radius:  var(--wf-radius);
+}

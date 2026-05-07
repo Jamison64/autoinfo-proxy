@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WF — Find My Vehicle</title>
+
+  <!-- Google Fonts: Rajdhani -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 4.6.2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+  <style>
+    /* ============================================================
+       WF DESIGN TOKENS
+    ============================================================ */
+    :root {
+      --wf-blue:        #138cc3;
+      --wf-blue-dk:     #0f7aab;
+      --wf-clear:       #55869d;
+      --wf-clear-dk:    #467388;
+      --wf-nav:         #53879f;
+      --wf-charcoal:    #383e47;
+      --wf-dark-header: #3a3e45;
+      --wf-green:       #44db4c;
+      --wf-text:        #212529;
+      --wf-white:       #ffffff;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: var(--wf-text);
+      background: #f0f2f4;
+      margin: 0;
+    }
+
+    /* ============================================================
+       SHARED BUTTONS
+    ============================================================ */
+    .btn-wf-blue {
+      background-color: var(--wf-blue);
+      border: 1px solid var(--wf-blue);
+      color: var(--wf-white);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      text-transform: uppercase;
+      border-radius: 5px;
+      padding: 9px 20px;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+    .btn-wf-blue:hover { background-color: #0f7aab; border-color: #0f7aab; color: #fff; }
+    #fmv-search-btn:hover { border-color: #ffffff; }
+    #fmv-search-btn:focus,
+    #fmv-search-btn:focus-visible { outline: none; box-shadow: none; }
+
+    .btn-wf-charcoal {
+      background-color: var(--wf-charcoal);
+      border: 1px solid var(--wf-charcoal);
+      color: var(--wf-white);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      border-radius: 5px;
+      padding: 9px 20px;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+    .btn-wf-charcoal:hover { background-color: #2c3038; border-color: #2c3038; color: #fff; }
+
+    .btn-wf-clear {
+      background-color: var(--wf-clear);
+      border: 1px solid var(--wf-clear);
+      color: var(--wf-white);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      text-transform: uppercase;
+      border-radius: 5px;
+      padding: 9px 20px;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+      line-height: 1.3;
+    }
+    .btn-wf-clear:hover { background-color: var(--wf-clear-dk); border-color: var(--wf-clear-dk); color: #fff; }
+
+    /* ============================================================
+       FMV PAGE
+    ============================================================ */
+    .fmv-page-wrap {
+      max-width: 1570px;
+      margin: 0 auto;
+      padding: 18px 16px 40px;
+    }
+
+    /* Breadcrumb */
+    .wf-breadcrumb {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .wf-breadcrumb a { color: #888; text-decoration: none; }
+    .wf-breadcrumb a:hover { text-decoration: underline; }
+    .wf-breadcrumb .sep { margin: 0 5px; }
+
+    /* Page title */
+    .wf-page-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      text-transform: uppercase;
+      margin: 0 0 14px;
+      color: var(--wf-text);
+    }
+
+    /* FMV card */
+    .fmv-card {
+      background: #fff;
+      border: 1px solid #d8dce0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    /* FMV Header Bar */
+    .fmv-header-bar {
+      background-color: var(--wf-dark-header);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .fmv-header-icon { flex-shrink: 0; }
+    .fmv-header-icon svg { display: block; }
+    .fmv-header-icon img { display: block; height: 32px; width: auto; }
+    .fmv-header-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--wf-white);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .fmv-header-vehicle {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--wf-green);
+      letter-spacing: 0.5px;
+    }
+
+    /* FMV Sub-bar */
+    .fmv-sub-bar {
+      background: #f0f2f4;
+      border-bottom: 1px solid #d8dce0;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .fmv-sub-bar input,
+    .fmv-sub-bar select {
+      height: 40px;
+      border: 1px solid #c8cdd2;
+      border-radius: 4px;
+      padding: 6px 12px;
+      font-size: 14px;
+      background: #fff;
+      color: var(--wf-text);
+    }
+    .fmv-sub-bar select {
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23666' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .fmv-sub-bar input:focus,
+    .fmv-sub-bar select:focus { outline: none; border-color: var(--wf-blue); }
+
+    @media (max-width: 767px) {
+      .fmv-header-bar { flex-wrap: wrap; }
+      .fmv-header-vehicle { flex: 0 0 100%; }
+      .fmv-sub-bar { flex-direction: row; flex-wrap: wrap; align-items: stretch; }
+      .fmv-sub-bar input,
+      .fmv-sub-bar select { flex: 1 1 0; min-width: 0; width: auto !important; }
+      .fmv-sub-bar button { flex: 0 0 100%; width: 100%; }
+    }
+
+    /* ============================================================
+       SECTION DIVIDER (within card — PNS separator)
+    ============================================================ */
+    .card-section { padding: 16px; }
+    .card-section + .card-section { border-top: 2px solid #e4e6e9; }
+
+    /* ============================================================
+       CASCADE COLUMNS
+    ============================================================ */
+    .cascade-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 991px) { .cascade-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 767px) { .cascade-grid { grid-template-columns: 1fr; } }
+
+    .cascade-col { min-width: 0; }
+
+    /* Mobile: one-at-a-time */
+    @media (max-width: 767px) {
+      .cascade-col { display: none; }
+      .cascade-col.mob-active { display: block; }
+    }
+
+    .cascade-col-label {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #555;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    /* Locked display field */
+    .cascade-locked {
+      display: none;
+      width: 100%;
+      padding: 6px 9px;
+      background: #fff;
+      border: 2px solid var(--wf-blue);
+      border-radius: 4px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      color: #222;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cascade-change {
+      display: none;
+      font-size: 11px;
+      color: #888;
+      cursor: pointer;
+      margin-top: 3px;
+      text-decoration: none;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .cascade-change:hover { color: var(--wf-blue); text-decoration: underline; }
+
+    /* Scrollable list */
+    .cascade-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #d0d5db;
+      border-radius: 4px;
+      background: #fff;
+      margin-top: 4px;
+    }
+    .cascade-list.disabled {
+      background: #f5f6f7;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .cascade-list::-webkit-scrollbar { width: 5px; }
+    .cascade-list::-webkit-scrollbar-track { background: #f0f0f0; }
+    .cascade-list::-webkit-scrollbar-thumb { background: #b0b8c1; border-radius: 3px; }
+
+    .cascade-item {
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: 'Rajdhani', sans-serif;
+      color: #333;
+      border-bottom: 1px solid #f2f2f2;
+      line-height: 1.35;
+    }
+    .cascade-item:last-child { border-bottom: none; }
+    .cascade-item:hover { background: #d6f3fb; }
+    .cascade-item.selected {
+      background: #b0ecf7;
+      color: #222;
+      font-weight: 600;
+    }
+    .cascade-item.c-header {
+      font-style: italic;
+      color: #999;
+      font-size: 12px;
+      cursor: default;
+      pointer-events: none;
+      background: transparent;
+    }
+    .cascade-item.c-divider {
+      border-top: 1px solid #ddd;
+      cursor: default;
+      pointer-events: none;
+      padding: 0;
+      height: 0;
+      overflow: hidden;
+    }
+    .cascade-spinner {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0;
+    }
+
+    /* Mobile progress indicator */
+    .mob-cascade-progress {
+      display: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+      letter-spacing: 0.3px;
+    }
+    @media (max-width: 767px) { .mob-cascade-progress { display: block; } }
+
+    /* ============================================================
+       MULTIPLE VEHICLE SELECTION PANEL
+    ============================================================ */
+    .multi-vehicle-panel {
+      display: none;
+      background: #fffbf0;
+      border: 1px solid #f0d060;
+      border-radius: 5px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+    .multi-vehicle-panel h5 {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .multi-vehicle-opt {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 10px;
+      border-bottom: 1px solid #f0e0a0;
+      cursor: pointer;
+    }
+    .multi-vehicle-opt:last-child { border-bottom: none; }
+    .multi-vehicle-opt:hover { background: #fff8d0; }
+    .multi-vehicle-opt label { margin: 0; cursor: pointer; font-size: 14px; }
+
+    /* ============================================================
+       VEHICLE CONFIRMED ALERT
+    ============================================================ */
+
+    /* ============================================================
+       LEFT FILTER PANEL
+    ============================================================ */
+    .filter-sidebar { padding-right: 6px; }
+
+    .filter-header-bar {
+      background: #138cc3;
+      border: 2px solid #bfc1c4;
+      color: #ffffff;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+    #vs-products .vs-cat-header:first-child { margin-top: 0; }
+    .filter-chevron { font-size: 11px; transition: transform 0.2s; }
+    .filter-chevron.collapsed { transform: rotate(180deg); }
+
+    .filter-tree { font-family: 'Rajdhani', sans-serif; }
+    .fi {
+      padding: 5px 8px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #333;
+      cursor: pointer;
+      border-radius: 3px;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid #bfc1c4;
+    }
+    /* Accordion group (SHOW ALL, PROVENT KITS, etc.) */
+    .fi.fi-group:hover  { background: #d6f3fb; }
+    .fi.fi-group.active { background: #b0ecf7; color: #222; }
+    .fi.fi-parent {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .fi-arrow { font-size: 10px; color: #aaa; transition: transform 0.2s; }
+
+
+    /* Main-cat items (Air Filters etc. under SHOW ALL) */
+    .fi.fi-main-cat {
+      padding-left: 14px;
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: none;
+      color: #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .fi.fi-main-cat .fi-label { flex: 1; min-width: 0; }
+    .fi.fi-main-cat .fi-count { flex-shrink: 0; }
+    .fi.fi-main-cat:hover,
+    .fi.fi-main-cat.active { background: #f0f2f4; color: #333; }
+
+    /* Sub-cat items (Catch Can Kits etc. under expand parents) */
+    .fi.fi-sub-cat {
+      padding-left: 14px;
+      font-size: 13px;
+      font-weight: 400;
+      text-transform: none;
+      color: #555;
+    }
+    .fi.fi-sub-cat:hover,
+    .fi.fi-sub-cat.active { background: #f0f2f4; color: #333; }
+
+    .fi-count { font-size: 11px; font-weight: 400; color: #999; margin-left: 4px; }
+    .fi-group-right { margin-left: auto; display: flex; align-items: center; gap: 5px; }
+    .fi.fi-main-cat.active { background: #ddf0f8; color: #0f7aab; font-weight: 700; }
+
+    .filter-mobile-btn {
+      width: 100%;
+      margin-bottom: 8px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mob-filter-wrap {
+      border: 1px solid #d8dce0;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 12px;
+      display: none;
+      background: #fff;
+    }
+    .mob-filter-wrap.open { display: block; }
+    @media (max-width: 767px) {
+      #tab-vs.pns-active { display: none; }
+    }
+
+    /* ============================================================
+       VEHICLE SEARCH RESULTS TABLE
+    ============================================================ */
+    .vs-cat-header {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      background: #f3f5f6;
+      padding: 7px 12px;
+      border: 1px solid #dddfe1;
+      margin: 10px 0 0;
+      letter-spacing: 0.3px;
+      border-radius: 5px;
+    }
+
+    /* Products column must not expand beyond its Bootstrap grid allocation */
+    #vs-products-col { min-width: 0; }
+    #vs-products { width: 100%; overflow-x: auto; }
+
+    .vs-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      margin-bottom: 0;
+    }
+    .vs-table thead th {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: #555;
+      padding: 7px 10px;
+      border-bottom: 2px solid #e0e4e8;
+      white-space: nowrap;
+      letter-spacing: 0.4px;
+      overflow: hidden;
+    }
+    /* Fixed column widths for the 6-column results table */
+    .vs-table colgroup .col-brand  { width: 200px; }
+    .vs-table colgroup .col-image  { width: 190px; }
+    .vs-table colgroup .col-sku    { width: 110px; }
+    .vs-table colgroup .col-desc   { width: auto;  }
+    .vs-table colgroup .col-price  { width: 140px; }
+    .vs-table colgroup .col-action { width: 130px; }
+
+    .vs-table td { padding: 10px; vertical-align: middle; overflow: hidden; border-bottom: 1px solid #e4e6e9; }
+    .vs-table tr:last-child td { border-bottom: none; }
+    .vs-table td:nth-child(3) { text-align: center; }
+    .vs-table td:nth-child(5) { text-align: center; }
+    .part-desc-link { word-break: break-word; }
+    .part-crossref  { word-break: break-word; }
+
+    @media (max-width: 767px) {
+      #vs-products { overflow-x: visible; }
+      .vs-cat-header { margin-bottom: 8px; }
+      .vs-table, .vs-table tbody { display: block; }
+      .vs-table thead { display: none; }
+      .vs-table tbody {
+        border: 1px solid #e0e4e8;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 8px;
+        margin-bottom: 8px;
+      }
+      .vs-table tr {
+        display: grid;
+        grid-template-columns: 274px 1fr;
+        grid-template-rows: auto auto auto auto;
+        border: none;
+        border-radius: 5px;
+        margin: 0 auto 12px;
+        max-width: calc(100% - 16px);
+        background: #fff !important;
+        padding: 8px;
+        overflow: hidden;
+      }
+      .vs-table tr:last-child { margin-bottom: 0; }
+      .vs-table td { display: block; border: none; padding: 4px 8px; }
+      .vs-table td.brand-cell { display: none; }
+      .vs-table td.td-img {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        min-height: 274px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 22px;
+      }
+      .vs-table td.td-img img { width: 230px !important; height: 230px !important; }
+      .vs-table td:nth-child(3) { grid-column: 2; grid-row: 1; align-self: end;    text-align: left; }
+      .vs-table td:nth-child(4) { grid-column: 2; grid-row: 2; align-self: center; }
+      .vs-table td:nth-child(5) { grid-column: 2; grid-row: 3; align-self: start;  text-align: left; }
+      .vs-table td:nth-child(6) { grid-column: 1 / 3; grid-row: 4; padding: 4px 8px; }
+      .vs-table td:nth-child(6) .btn-add-cart { width: 100%; }
+    }
+
+    /* ============================================================
+       PART NUMBER SEARCH RESULTS TABLE
+    ============================================================ */
+    .pns-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+    }
+    /* Fixed column widths for the 6-column PNS results table */
+    .pns-table colgroup .col-brand  { width: 200px; }
+    .pns-table colgroup .col-image  { width: 190px; }
+    .pns-table colgroup .col-sku    { width: 110px; }
+    .pns-table colgroup .col-desc   { width: auto;  }
+    .pns-table colgroup .col-price  { width: 140px; }
+    .pns-table colgroup .col-action { width: 200px; }
+    .pns-table td:nth-child(3) { text-align: center; }
+    .pns-table thead th {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      color: #444;
+      padding: 10px;
+      border-bottom: 2px solid #e0e4e8;
+      white-space: nowrap;
+    }
+    .pns-table td { padding: 10px; vertical-align: middle; border-bottom: 1px solid #e4e6e9; }
+    .pns-table tr:last-child td { border-bottom: none; }
+
+    @media (max-width: 767px) {
+      .pns-table, .pns-table tbody { display: block; }
+      .pns-table thead { display: none; }
+      #pns-tbody {
+        border: 1px solid #e0e4e8;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 8px;
+      }
+      .pns-table tr {
+        display: grid;
+        grid-template-columns: 274px 1fr;
+        grid-template-rows: auto auto auto auto;
+        border: none;
+        border-radius: 5px;
+        margin: 0 auto 12px;
+        max-width: calc(100% - 16px);
+        background: #fff !important;
+        padding: 8px;
+        overflow: hidden;
+      }
+      .pns-table tr:last-child { margin-bottom: 0; }
+      .pns-table td { display: block; border: none; padding: 4px 8px; }
+      .pns-table td.brand-cell { display: none; }
+      .pns-table td.td-img {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        min-height: 274px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 22px;
+      }
+      .pns-table td.td-img img { width: 230px !important; height: 230px !important; }
+      .pns-table td:nth-child(3) { grid-column: 2; grid-row: 1; align-self: end; }
+      .pns-table td:nth-child(4) { grid-column: 2; grid-row: 2; align-self: center; }
+      .pns-table td.td-price    { grid-column: 2; grid-row: 3; align-self: start; }
+      .pns-table td.td-actions  {
+        grid-column: 1 / 3;
+        grid-row: 4;
+        padding: 4px 8px;
+      }
+      .pns-table td.td-actions .btn-add-cart,
+      .pns-table td.td-actions .btn-veh-app { width: 100%; }
+    }
+
+    /* Shared result cell styles */
+    .brand-cell { text-align: center; min-width: 200px; }
+    .brand-logo { width: 136px; height: 94px; object-fit: contain; display: block; margin: 0 auto; }
+    .brand-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: #888;
+      text-align: left;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+    .pns-table .td-img { text-align: center; }
+    .part-img-link img { width: 110px; height: 110px; object-fit: contain; display: block; }
+    .part-sku { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 16px; color: #393e44; }
+    .part-category {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: #393e44;
+      letter-spacing: 0.2px;
+      margin-bottom: 2px;
+    }
+    .part-desc-link { color: #0c4c8a; text-decoration: none; font-weight: 500; font-size: 14px; }
+    .part-desc-link:hover { text-decoration: underline; }
+    .part-autoinfo-desc { font-size: 13px; color: var(--wf-blue); margin-top: 3px; line-height: 1.4; }
+    .part-crossref { font-size: 12px; color: #333; margin-top: 3px; line-height: 1.4; }
+    .part-price { color: #b61319; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 16px; white-space: nowrap; }
+    .btn-add-cart {
+      width: 100%; background: var(--wf-blue); color: #fff;
+      border: none; border-radius: 4px;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 16px; text-transform: uppercase; padding: 7px 10px;
+      cursor: pointer; white-space: nowrap; letter-spacing: 0.3px;
+    }
+    .btn-add-cart:hover { background: #0f7aab; }
+    .btn-veh-app {
+      width: 100%; background: #ffffff; color: #465f6b;
+      border: 3px solid #53879f; border-radius: 4px;
+      font-family: 'Rajdhani', sans-serif; font-weight: 700;
+      font-size: 16px; text-transform: uppercase; padding: 7px 10px;
+      cursor: pointer; margin-top: 5px; white-space: nowrap; letter-spacing: 0.3px;
+    }
+    .btn-veh-app:hover { background: #3a3e45; color: #fff; border-color: #3a3e45; }
+    .btn-veh-app.active { background: var(--wf-blue); color: #fff; border-color: var(--wf-blue); }
+
+    /* ============================================================
+       VEHICLE APPLICATION PANEL
+    ============================================================ */
+    .veh-app-panel {
+      display: none;
+      margin-top: 16px;
+      border: 1px solid #e0e4e8;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .veh-app-header {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      padding: 10px 16px;
+      background: #f5f6f7;
+      border-bottom: 1px solid #e0e4e8;
+    }
+    .veh-app-row {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+      line-height: 1.5;
+    }
+    .veh-app-row:nth-child(even) { background: #f8f9fa; }
+    .veh-app-row:last-child { border-bottom: none; }
+
+    /* ============================================================
+       PAGINATION
+    ============================================================ */
+    .pagination .page-item.active .page-link {
+      background-color: #000;
+      border-color: #000;
+      color: var(--wf-green);
+    }
+    .pagination .page-link {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      color: #333;
+    }
+    .pagination .page-link:hover { background: #e9ecef; color: #000; }
+
+    /* ============================================================
+       ALERTS & SPINNERS
+    ============================================================ */
+    .alert { border-radius: 0; padding: .3rem .75rem; font-size: 14px; }
+    .spinner-border { color: var(--wf-blue); }
+    .wf-spinner { display: none; justify-content: center; padding: 16px 0; }
+    .wf-spinner.active { display: flex; }
+
+    /* ============================================================
+       PART NUMBER SEARCH — INPUT BAR
+    ============================================================ */
+    .pns-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 14px 0;
+    }
+    .pns-bar input {
+      border: 1px solid #c8cdd2;
+      border-radius: 4px;
+      padding: 9px 12px;
+      font-size: 14px;
+      height: 42px;
+      width: 240px;
+    }
+    .pns-bar input:focus { outline: none; border-color: var(--wf-blue); }
+    @media (max-width: 767px) {
+      .pns-bar { flex-direction: column; }
+      .pns-bar input, .pns-bar button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div style="background:#f0f2f4; padding-top:1px;">
+<div class="fmv-page-wrap">
+
+  <!-- Breadcrumb -->
+  <div class="wf-breadcrumb">
+    <a href="#">Home</a>
+    <span class="sep">›</span>
+    <span>Find my vehicle</span>
+  </div>
+
+  <!-- Page Title -->
+  <h1 class="wf-page-title">FIND MY VEHICLE</h1>
+
+  <!-- FMV Card -->
+  <div class="fmv-card">
+
+    <!-- ── FMV Header Bar ── -->
+    <div class="fmv-header-bar">
+      <div class="fmv-header-icon">
+        <svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1045.3 872.5" height="38" style="display:block;">
+          <path fill="#44db4c" d="M176.2,843.1c0,9.1-8.6,15.4-16.9,15.4l-101.9-.2c-10.1,0-15.9-9.5-15.9-18.8v-108.1c14.5,15.7,33.9,24.6,55.3,24.6h79.7c0,0-.3,87.1-.3,87.1h0Z"/>
+          <path fill="#44db4c" d="M883.8,858.6c-9.4,0-17.4-6.8-17.4-16l-.2-86.4h79.7c21.2,0,40.3-8.8,55.1-24.7v109.9c0,10-8,17.3-17.7,17.2h-99.5,0Z"/>
+          
+          <path fill="#44db4c" d="M1029.5,243c-2.2-4.1-4.8-10.8-10.2-10.8l-100.2-.3c-19.1-41.3-39.3-81.5-61.1-121.5l-23.9-41.3c-7.5-8.1-21-10.9-32.5-13.7l-6.3-25.5c-2.1-8.5-9.5-14.3-18.2-12.9-7.9,1.2-15.2,8.9-13.2,17.4l3.5,15.4c-25.3-3.3-49.5-5.1-74.8-6.5-56.6-3.2-112.4-5-169.3-3.9l-157,3c-30.9,1.5-60.4,3.5-91.1,7.3l3.1-12.9c2.2-8.9-3.1-17.3-11.2-19.5-8.7-2.3-17.3,2.9-19.5,11.8l-6.6,26.3c-11.4,2.6-24,5.4-32,13-5.3,8.2-9.8,15.8-14.7,24.5-25.5,45.4-48.8,91.6-70.7,138.8l-100.2.2c-5.4,0-8,6.8-10.2,10.8-5.3,17.8-5.7,36.7.6,54.2,1.5,4,4.8,9.8,9.4,9.8l68.4.4c-8.4,14.4-19.1,25.5-31.4,35.4-11.1,8.9-17.4,21.7-18.2,36.2l-12.1,206.6c-.5,9.5-.5,17.7,1,26.8l12.5,77.4c4.3,26.4,27,45.9,54.1,45.9h847.7c26.6,0,49.6-19,53.8-45.1l12.7-78.2c1.3-8.3,1.6-15.5,1.1-24.7v.3c0,0-12.1-208.6-12.1-208.6-.9-16.1-8.4-29-20.8-38.6-11.6-9-20.8-19.9-28.8-33l68.4-.5c4.6,0,8-5.8,9.4-9.8,6.3-17.6,5.8-36.4.6-54.2ZM132.4,293.7c5-15.4,11-29.4,17.8-44.3,21.7-47.8,45.4-94,70.8-139.9,8.3-15.1,22.1-23.7,39.1-26.2,26.5-4,52.2-6.3,79.2-8,60.1-3.8,119.9-4.5,180-4.5s119.1.6,178.9,4.2c28.7,1.7,56.1,4.1,84.3,8.3,17.1,2.5,30.8,11,39.2,26.2,25.3,45.7,48.8,91.6,70.5,139.2l18.3,44.9c1.2,6.9-2.5,13.4-11,13.4H142.6c-7.2,0-12.3-6.7-10.2-13.3ZM283.8,613.4H106.5v-37.5h177.3v37.5ZM287.7,468.4c-2.4,10.4-11.8,18.5-23.4,18.5l-125.6-.8c-30.2-.1-52.3-27-47.3-56.1,4.9-28.8,35.4-48.1,63.6-36.7l119.2,48c11.2,4.5,15.9,16.7,13.5,27.1ZM639.9,682.5c0,6.5-4.7,12.6-12.4,12.6h0c0,.1-211.9.1-211.9.1-7,0-12.8-5.1-12.9-11.8v-31.8c0-7.4,5.1-12.9,12.8-12.9h211.6c7.8,0,12.8,5.5,12.8,12.8v31ZM936.2,613.4h-177.4v-37.5h177.4v37.5ZM951.3,430c4.9,28.6-16.6,55.8-46.5,56l-126,1c-12.8,0-22.3-8.9-24.1-20-1.9-12.1,4.9-22.4,16.3-26.9l117.6-47c27.8-11.1,57.9,8.5,62.7,36.9Z"/>
+        </svg>
+      </div>
+      <span class="fmv-header-title">FIND MY VEHICLE |</span>
+      <span class="fmv-header-vehicle" id="fmv-vehicle-label"></span>
+    </div>
+
+    <!-- ── Sub-bar ── -->
+    <div class="fmv-sub-bar">
+      <input type="text" id="fmv-plate" placeholder="REGO Number" maxlength="10" autocomplete="off" style="width:145px;">
+      <select id="fmv-place" title="Select State" style="width:190px;">
+        <option value="">Select your State</option>
+        <option value="AU-ACT">ACT</option>
+        <option value="AU-NSW">NSW</option>
+        <option value="AU-NT">NT</option>
+        <option value="AU-QLD">QLD</option>
+        <option value="AU-SA">SA</option>
+        <option value="AU-TAS">TAS</option>
+        <option value="AU-VIC">VIC</option>
+        <option value="AU-WA">WA</option>
+        <option value="NZ-">NEW ZEALAND</option>
+      </select>
+      <input type="text" id="fmv-partno" placeholder="Part Number" maxlength="15" autocomplete="off" style="width:155px;">
+      <button class="btn-wf-blue" id="fmv-search-btn">SEARCH / FIND</button>
+      <button class="btn-wf-clear" id="fmv-clear-btn">CLEAR</button>
+    </div>
+
+    <!-- ============================================================
+         VEHICLE SEARCH
+    ============================================================ -->
+    <div class="card-section" id="tab-vs">
+
+      <!-- Mobile: FILTER BY button -->
+      <div class="d-md-none">
+        <button class="btn-wf-charcoal filter-mobile-btn" id="mob-filter-btn">
+          FILTER BY <span id="mob-filter-arrow">▾</span>
+        </button>
+        <div class="mob-filter-wrap" id="mob-filter-wrap">
+          <div id="mob-filter-tree"></div>
+        </div>
+      </div>
+
+      <!-- Mobile cascade progress -->
+      <div class="mob-cascade-progress" id="mob-cascade-progress">Step 1 of 6: Select Make</div>
+
+      <!-- Cascade columns -->
+      <div class="cascade-grid" id="cascade-grid">
+
+        <!-- MAKE -->
+        <div class="cascade-col mob-active" id="cc-make">
+          <div class="cascade-col-label">MAKE</div>
+          <div class="cascade-locked" id="locked-make"></div>
+          <a class="cascade-change" id="change-make">↺ change</a>
+          <div class="cascade-list" id="list-make"></div>
+        </div>
+
+        <!-- MODEL -->
+        <div class="cascade-col" id="cc-model">
+          <div class="cascade-col-label">MODEL</div>
+          <div class="cascade-locked" id="locked-model"></div>
+          <a class="cascade-change" id="change-model">↺ change</a>
+          <div class="cascade-list disabled" id="list-model"></div>
+        </div>
+
+        <!-- YEAR -->
+        <div class="cascade-col" id="cc-year">
+          <div class="cascade-col-label">YEAR</div>
+          <div class="cascade-locked" id="locked-year"></div>
+          <a class="cascade-change" id="change-year">↺ change</a>
+          <div class="cascade-list disabled" id="list-year"></div>
+        </div>
+
+        <!-- CHASSIS -->
+        <div class="cascade-col" id="cc-chassis">
+          <div class="cascade-col-label">CHASSIS</div>
+          <div class="cascade-locked" id="locked-chassis"></div>
+          <a class="cascade-change" id="change-chassis">↺ change</a>
+          <div class="cascade-list disabled" id="list-chassis"></div>
+        </div>
+
+        <!-- ENGINE -->
+        <div class="cascade-col" id="cc-engine">
+          <div class="cascade-col-label">ENGINE</div>
+          <div class="cascade-locked" id="locked-engine"></div>
+          <a class="cascade-change" id="change-engine">↺ change</a>
+          <div class="cascade-list disabled" id="list-engine"></div>
+        </div>
+
+        <!-- DETAILS -->
+        <div class="cascade-col" id="cc-details">
+          <div class="cascade-col-label">DETAILS</div>
+          <div class="cascade-locked" id="locked-details"></div>
+          <a class="cascade-change" id="change-details">↺ change</a>
+          <div class="cascade-list disabled" id="list-details"></div>
+        </div>
+
+      </div><!-- /cascade-grid -->
+
+      <div class="mb-3">
+        <button class="btn-wf-clear" id="cascade-clear-btn" style="padding:6px 16px;font-size:15px;">CLEAR</button>
+      </div>
+
+      <!-- Multiple vehicle selection -->
+      <div class="multi-vehicle-panel" id="multi-vehicle-panel">
+        <h5>Please select your vehicle:</h5>
+        <div id="multi-vehicle-list"></div>
+      </div>
+
+      <input type="hidden" id="vc-id" value="">
+
+      <!-- Spinners / alerts -->
+      <div class="wf-spinner" id="vs-spinner">
+        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+      </div>
+      <div class="alert alert-danger" id="vs-error" style="display:none;">An unexpected error occurred. Please try again.</div>
+      <div class="alert alert-warning" id="vs-no-parts" style="display:none;">No parts found for this vehicle.</div>
+
+      <!-- Results: filter sidebar + products -->
+      <div class="row" id="vs-results" style="display:none;">
+
+        <!-- Desktop filter sidebar -->
+        <div class="col-md-2 d-none d-md-block filter-sidebar" id="desktop-filter">
+          <div class="filter-header-bar" id="filter-toggle">
+            SHOW ALL PARTS <span class="filter-chevron" id="filter-chevron">▲</span>
+          </div>
+          <div id="filter-tree-desktop" class="filter-tree"></div>
+        </div>
+
+        <!-- Products column -->
+        <div class="col-md-10 col-12" id="vs-products-col">
+          <div id="vs-products"></div>
+          <nav class="mt-3">
+            <ul class="pagination justify-content-center" id="vs-pagination" style="display:none;"></ul>
+          </nav>
+        </div>
+
+      </div><!-- /vs-results -->
+
+    </div><!-- /vehicle-search -->
+
+    <!-- ============================================================
+         PART NUMBER SEARCH  (hidden until triggered)
+    ============================================================ -->
+    <div class="card-section" id="tab-pns" style="display:none;">
+
+      <input type="hidden" id="pns-input" value="">
+
+      <!-- Spinners / alerts -->
+      <div class="wf-spinner" id="pns-spinner">
+        <div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div>
+      </div>
+      <div class="alert alert-danger" id="pns-error" style="display:none;">An unexpected error occurred. Please try again.</div>
+      <div class="alert alert-warning" id="pns-no-results" style="display:none;">No parts found for this search.</div>
+
+      <!-- Results table -->
+      <div id="pns-results" style="display:none;">
+        <div style="width:100%;overflow-x:auto;">
+        <table class="pns-table">
+          <colgroup>
+            <col class="col-brand">
+            <col class="col-image">
+            <col class="col-sku">
+            <col class="col-desc">
+            <col class="col-price">
+            <col class="col-action">
+          </colgroup>
+          <tbody id="pns-tbody"></tbody>
+        </table>
+        </div>
+        <nav class="mt-3">
+          <ul class="pagination justify-content-center" id="pns-pagination" style="display:none;"></ul>
+        </nav>
+      </div>
+
+      <!-- Vehicle application panel -->
+      <div class="veh-app-panel" id="veh-app-panel">
+        <div class="veh-app-header">Vehicle Application</div>
+        <div id="veh-app-list"></div>
+        <nav class="p-2" id="veh-app-pag-nav" style="display:none;">
+          <ul class="pagination justify-content-center mb-0" id="veh-app-pagination"></ul>
+        </nav>
+      </div>
+
+    </div><!-- /part-number-search -->
+
+  </div><!-- /fmv-card -->
+</div><!-- /fmv-page-wrap -->
+</div><!-- bg wrapper -->
+
+
+<!-- jQuery (required by Bootstrap 4) -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
+<!-- Bootstrap 4.6.2 JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+'use strict';
+
+/* ============================================================
+   API — local Node proxy (server.js on port 3000)
+   For production: swap to GCP URL
+============================================================ */
+const API_BASE = 'https://autoinfo-proxy-142078782118.australia-southeast1.run.app';
+
+async function api(endpoint, params) {
+  const url = new URL(API_BASE + endpoint);
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== '') url.searchParams.set(k, v);
+    });
+  }
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+/* ============================================================
+   FILTER TREE (dynamic — built from AutoInfo subCatDescription)
+============================================================ */
+const MOCK = {
+  filterTree: [
+    { id:'oil-catch-cans', label:'OIL CATCH CANS',   level:1, expand:true },
+    { id:'occ-1',  label:'Provent Catch Can Kits',              level:2, parent:'oil-catch-cans' },
+    { id:'occ-2',  label:'Provent Accessories',                 level:2, parent:'oil-catch-cans' },
+    { id:'occ-3',  label:'Donaldson Crankcase Ventilation',     level:2, parent:'oil-catch-cans' },
+    { id:'occ-4',  label:'Fleetguard Crankcase Ventilation',    level:2, parent:'oil-catch-cans' },
+    { id:'occ-5',  label:'Racor CCV Crankcase Ventilation',     level:2, parent:'oil-catch-cans' },
+    { id:'occ-6',  label:'Wesfil Crankcase Ventilation',        level:2, parent:'oil-catch-cans' },
+
+    { id:'pre-filters', label:'PRE-FILTERS',          level:1, expand:true },
+    { id:'pf-1',   label:'PF Dual Bracket Kits',                level:2, parent:'pre-filters' },
+    { id:'pf-2',   label:'WF Donaldson Pre-Filter Kits',        level:2, parent:'pre-filters' },
+    { id:'pf-3',   label:'Fleetguard Fuel Filter Water Separators', level:2, parent:'pre-filters' },
+    { id:'pf-4',   label:'Fuel Manager Pre Filters',            level:2, parent:'pre-filters' },
+    { id:'pf-5',   label:'Fuel Manager Fittings and Parts',     level:2, parent:'pre-filters' },
+    { id:'pf-6',   label:'Mann PreLine Kits',                   level:2, parent:'pre-filters' },
+    { id:'pf-7',   label:'PreLine Accessories',                 level:2, parent:'pre-filters' },
+    { id:'pf-8',   label:'Baldwin Dahl Fuel Water Separators',  level:2, parent:'pre-filters' },
+    { id:'pf-9',   label:'Delphi Fuel Filter Water Separators', level:2, parent:'pre-filters' },
+    { id:'pf-10',  label:'Donaldson Fuel Filter Water Separators', level:2, parent:'pre-filters' },
+    { id:'pf-11',  label:'Hifi Fuel Filter Water Separators',   level:2, parent:'pre-filters' },
+    { id:'pf-12',  label:'Bulk Storage Fuel Separators',        level:2, parent:'pre-filters' },
+    { id:'pf-13',  label:'Mr Funnel',                           level:2, parent:'pre-filters' },
+    { id:'pf-14',  label:'Racor Fuel Filter Water Separators',  level:2, parent:'pre-filters' },
+    { id:'pf-15',  label:'Racor Replacement Parts',             level:2, parent:'pre-filters' },
+
+    { id:'trans-cooler', label:'TRANS COOLER KITS',  level:1, expand:true },
+
+    { id:'filter-kits', label:'FILTER KITS',          level:1, expand:true },
+    { id:'fk-1',   label:'Donaldson Filter Kits',               level:2, parent:'filter-kits' },
+    { id:'fk-2',   label:'Fleetguard Filter Kits',              level:2, parent:'filter-kits' },
+    { id:'fk-3',   label:'Mann-Filter Kits',                    level:2, parent:'filter-kits' },
+    { id:'fk-4',   label:'Sakura Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-5',   label:'Uni Filter Kits',                     level:2, parent:'filter-kits' },
+    { id:'fk-6',   label:'Wesfil Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-7',   label:'Western Filters Filter Kits',         level:2, parent:'filter-kits' },
+    { id:'fk-8',   label:'Hydraulic Filter Kits',               level:2, parent:'filter-kits' },
+    { id:'fk-9',   label:'Machinery Filter Kits',               level:2, parent:'filter-kits' },
+    { id:'fk-10',  label:'Transmission Filter Kits',            level:2, parent:'filter-kits' },
+    { id:'fk-11',  label:'Truck Kits',                          level:2, parent:'filter-kits' },
+    { id:'fk-12',  label:'Atlas Copco Filter Kits',             level:2, parent:'filter-kits' },
+    { id:'fk-13',  label:'Bobcat Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-14',  label:'Case IH Filter Kits',                 level:2, parent:'filter-kits' },
+    { id:'fk-15',  label:'CAT Filter Kits',                     level:2, parent:'filter-kits' },
+    { id:'fk-16',  label:'Chevrolet Filter Kits',               level:2, parent:'filter-kits' },
+    { id:'fk-17',  label:'Chrysler Filter Kits',                level:2, parent:'filter-kits' },
+    { id:'fk-18',  label:'Cummins Filter Kits',                 level:2, parent:'filter-kits' },
+    { id:'fk-19',  label:'Daewoo Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-20',  label:'Daf Filter Kits',                     level:2, parent:'filter-kits' },
+    { id:'fk-21',  label:'Detroit Filter Kits',                 level:2, parent:'filter-kits' },
+    { id:'fk-22',  label:'Duramax Silverado Filter Kits',       level:2, parent:'filter-kits' },
+    { id:'fk-23',  label:'Ford Filter Kits',                    level:2, parent:'filter-kits' },
+    { id:'fk-24',  label:'Foton Filter Kits',                   level:2, parent:'filter-kits' },
+    { id:'fk-25',  label:'Fuso Filter Kits',                    level:2, parent:'filter-kits' },
+    { id:'fk-26',  label:'Great Wall Filter Kits',              level:2, parent:'filter-kits' },
+    { id:'fk-27',  label:'Hino Filter Kits',                    level:2, parent:'filter-kits' },
+    { id:'fk-28',  label:'Hitachi Filter Kits',                 level:2, parent:'filter-kits' },
+    { id:'fk-29',  label:'Holden Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-30',  label:'Hyundai Filter Kits',                 level:2, parent:'filter-kits' },
+    { id:'fk-31',  label:'Isuzu Filter Kits',                   level:2, parent:'filter-kits' },
+    { id:'fk-32',  label:'JC Bamford Filter Kits',              level:2, parent:'filter-kits' },
+    { id:'fk-33',  label:'John Deere Filter Kits',              level:2, parent:'filter-kits' },
+    { id:'fk-34',  label:'Kia Filter Kits',                     level:2, parent:'filter-kits' },
+    { id:'fk-35',  label:'Komatsu Filter Kits',                 level:2, parent:'filter-kits' },
+    { id:'fk-36',  label:'LDV Filter Kits',                     level:2, parent:'filter-kits' },
+    { id:'fk-37',  label:'Mack Filter Kits',                    level:2, parent:'filter-kits' },
+    { id:'fk-38',  label:'Mazda Filter Kits',                   level:2, parent:'filter-kits' },
+    { id:'fk-39',  label:'Mercedes Benz Filter Kits',           level:2, parent:'filter-kits' },
+    { id:'fk-40',  label:'Mitsubishi Filter Kits',              level:2, parent:'filter-kits' },
+    { id:'fk-41',  label:'Nissan Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-42',  label:'Scania Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-43',  label:'Ssangyong Filter Kits',               level:2, parent:'filter-kits' },
+    { id:'fk-44',  label:'Toyota Filter Kits',                  level:2, parent:'filter-kits' },
+    { id:'fk-45',  label:'UD Filter Kits',                      level:2, parent:'filter-kits' },
+    { id:'fk-46',  label:'Volvo Filter Kits',                   level:2, parent:'filter-kits' },
+    { id:'fk-47',  label:'Volkswagen Filter Kits',              level:2, parent:'filter-kits' },
+    { id:'fk-48',  label:'Yanmar Filter Kits',                  level:2, parent:'filter-kits' },
+
+    { id:'filters', label:'FILTERS',                level:1, expand:true },
+    { id:'fi-1',   label:'Air Filters',                         level:2, parent:'filters' },
+    { id:'fi-2',   label:'Breather Filters',                    level:2, parent:'filters' },
+    { id:'fi-3',   label:'Fuel Filter',                         level:2, parent:'filters' },
+    { id:'fi-4',   label:'Lube Filter',                         level:2, parent:'filters' },
+    { id:'fi-5',   label:'Transmission Filter',                 level:2, parent:'filters' },
+    { id:'fi-6',   label:'Coolant Filters',                     level:2, parent:'filters' },
+    { id:'fi-7',   label:'Cabin Air Filters',                   level:2, parent:'filters' },
+    { id:'fi-8',   label:'Cabin Hepa Filters',                  level:2, parent:'filters' },
+    { id:'fi-9',   label:'DPF Filters',                         level:2, parent:'filters' },
+    { id:'fi-10',  label:'DPF Cleaning & Accessories',          level:2, parent:'filters' },
+    { id:'fi-11',  label:'Filter Wrenches',                     level:2, parent:'filters' },
+    { id:'fi-12',  label:'Fuel Filters',                        level:2, parent:'filters' },
+    { id:'fi-13',  label:'Fuel Filter Accessories',             level:2, parent:'filters' },
+    { id:'fi-14',  label:'Fuel Filter Primer Pumps',            level:2, parent:'filters' },
+    { id:'fi-15',  label:'Hydraulic Filters',                   level:2, parent:'filters' },
+    { id:'fi-16',  label:'Hydraulic Filter Accessories',        level:2, parent:'filters' },
+    { id:'fi-17',  label:'Housings & Accessories',              level:2, parent:'filters' },
+    { id:'fi-18',  label:'Marine Filters',                      level:2, parent:'filters' },
+    { id:'fi-19',  label:'Oil Filters',                         level:2, parent:'filters' },
+    { id:'fi-20',  label:'Oil Filter Caps',                     level:2, parent:'filters' },
+    { id:'fi-21',  label:'Transmission Filters',                level:2, parent:'filters' },
+
+    { id:'more', label:'MORE',                       level:1, expand:true },
+    { id:'mo-1',   label:'Additives & Coolants',                level:2, parent:'more' },
+    { id:'mo-2',   label:'Cooling Systems',                     level:2, parent:'more' },
+    { id:'mo-3',   label:'Camshaft Position Sensor',            level:2, parent:'more' },
+    { id:'mo-4',   label:'Accessories & Cleaning',              level:2, parent:'more' },
+    { id:'mo-5',   label:'Adhesives & Sealants',                level:2, parent:'more' },
+    { id:'mo-6',   label:'Battery Needs',                       level:2, parent:'more' },
+    { id:'mo-7',   label:'Belts & Pulleys',                     level:2, parent:'more' },
+    { id:'mo-8',   label:'Clamps',                              level:2, parent:'more' },
+    { id:'mo-9',   label:'Drum Pumps',                          level:2, parent:'more' },
+    { id:'mo-10',  label:'Engine Components',                   level:2, parent:'more' },
+    { id:'mo-11',  label:'Exhaust Parts',                       level:2, parent:'more' },
+    { id:'mo-12',  label:'Funnels Drain Pans & Plugs',          level:2, parent:'more' },
+    { id:'mo-13',  label:'Grease Equipment',                    level:2, parent:'more' },
+    { id:'mo-14',  label:'Hoses',                               level:2, parent:'more' },
+    { id:'mo-15',  label:'Lubricants',                          level:2, parent:'more' },
+    { id:'mo-16',  label:'Radiator Parts',                      level:2, parent:'more' }
+  ]
+};
+
+/* ============================================================
+   PLACEHOLDER IMAGES (inline SVG data URIs)
+============================================================ */
+function brandSVG(name) {
+  const init = name.substring(0,2).toUpperCase();
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='54'%3E%3Crect width='80' height='54' rx='3' fill='%23f0f2f4'/%3E%3Ctext x='40' y='35' font-family='Arial' font-size='19' font-weight='bold' fill='%23138cc3' text-anchor='middle'%3E${encodeURIComponent(init)}%3C/text%3E%3C/svg%3E`;
+}
+
+function partSVG() {
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' rx='4' fill='%23f5f6f7'/%3E%3Ccircle cx='40' cy='36' r='17' fill='none' stroke='%23d0d5db' stroke-width='3'/%3E%3Ccircle cx='40' cy='36' r='7' fill='%23e0e4e8'/%3E%3Ctext x='40' y='66' font-family='Arial' font-size='8' fill='%23aaa' text-anchor='middle'%3ENo Image%3C/text%3E%3C/svg%3E`;
+}
+
+/* ============================================================
+   CATEGORY GROUPS — WF BC Taxonomy mapping
+============================================================ */
+const CAT_GROUPS = [
+  { label: 'OIL CATCH CAN KITS', test: s => /catch can|crankcase/i.test(s) },
+  { label: 'PRE-FILTER KITS',    test: s => /pre.?filter|preline/i.test(s) },
+  { label: 'TRANS COOLER KITS',  test: s => /trans.?cooler|cooler.?kit/i.test(s) },
+  { label: 'FILTER KITS',        test: s => /filter.?kit/i.test(s) },
+  { label: 'FILTERS',            test: s => /filter/i.test(s) },
+  { label: 'MORE',               test: () => true },
+];
+
+function getCatGroup(subCatDesc) {
+  const s = subCatDesc || 'Other';
+  return (CAT_GROUPS.find(g => g.test(s)) || CAT_GROUPS[CAT_GROUPS.length - 1]).label;
+}
+
+/* ============================================================
+   STATE
+============================================================ */
+const S = {
+  cascade:        { make:null, model:null, year:null, chassis:null, engine:null, details:null },
+  vehicleId:      null,
+  vehicleLabel:   null,
+  activeFilter:   null,
+  activeGroup:    null,
+  allParts:       [],
+  filterCats:     [],
+  vehApp: { gtin:null, data:[], page:1, perPage:5 }
+};
+
+const COL_ORDER = ['make','model','year','chassis','engine','details'];
+const COL_LABEL = { make:'MAKE', model:'MODEL', year:'YEAR', chassis:'CHASSIS', engine:'ENGINE', details:'DETAILS' };
+const COL_STEP  = { make:1, model:2, year:3, chassis:4, engine:5, details:6 };
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function el(id) { return document.getElementById(id); }
+function showEl(id) { const e = el(id); if(e) e.style.display = ''; }
+function hideEl(id) { const e = el(id); if(e) e.style.display = 'none'; }
+function flexEl(id) { const e = el(id); if(e) e.style.display = 'flex'; }
+
+/* ============================================================
+   FILTER TREE
+============================================================ */
+function buildFilterTree(containerId) {
+  const c = el(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+
+  // Group parts by WF parent category
+  const groupMap = {};
+  S.allParts.forEach(p => {
+    const g = getCatGroup(p.subCatDescription);
+    if (!groupMap[g]) groupMap[g] = [];
+    groupMap[g].push(p);
+  });
+
+  CAT_GROUPS.forEach(grp => {
+    const partsInGroup = groupMap[grp.label];
+    if (!partsInGroup || partsInGroup.length === 0) return;
+
+    const isOpen = S.activeGroup === grp.label;
+
+    // Parent group header
+    const hdr = document.createElement('div');
+    hdr.className = 'fi fi-group fi-parent' + (isOpen ? ' active' : '');
+    hdr.innerHTML = `<span>${esc(grp.label)}</span><span class="fi-group-right"><span class="fi-count">${partsInGroup.length}</span><span class="fi-arrow">${isOpen ? '▴' : '▾'}</span></span>`;
+    hdr.addEventListener('click', () => {
+      S.activeGroup  = isOpen ? null : grp.label;
+      S.activeFilter = null;
+      buildFilterTree('filter-tree-desktop');
+      buildFilterTree('mob-filter-tree');
+      renderVehicleParts();
+    });
+    c.appendChild(hdr);
+
+    // Sub-items — only shown when group is open
+    if (isOpen) {
+      const subCats = [...new Set(partsInGroup.map(p => p.subCatDescription || 'Other'))].sort();
+      subCats.forEach(cat => {
+        const count = partsInGroup.filter(p => (p.subCatDescription || 'Other') === cat).length;
+        const d = document.createElement('div');
+        d.className = 'fi fi-main-cat' + (cat === S.activeFilter ? ' active' : '');
+        d.innerHTML = `<span class="fi-label">${esc(cat)}</span><span class="fi-count">${count}</span>`;
+        d.addEventListener('click', e => {
+          e.stopPropagation();
+          S.activeFilter = cat;
+          buildFilterTree('filter-tree-desktop');
+          buildFilterTree('mob-filter-tree');
+          renderVehicleParts();
+        });
+        c.appendChild(d);
+      });
+    }
+  });
+}
+
+el('filter-toggle').addEventListener('click', () => {
+  const tree = el('filter-tree-desktop');
+  const chev = el('filter-chevron');
+  if (S.activeFilter || S.activeGroup) {
+    S.activeFilter = null;
+    S.activeGroup  = null;
+    buildFilterTree('filter-tree-desktop');
+    buildFilterTree('mob-filter-tree');
+    renderVehicleParts();
+    tree.style.display = '';
+    chev.classList.remove('collapsed');
+  } else {
+    const hidden = tree.style.display === 'none';
+    tree.style.display = hidden ? '' : 'none';
+    chev.classList.toggle('collapsed', !hidden);
+  }
+});
+
+el('mob-filter-btn').addEventListener('click', () => {
+  const wrap = el('mob-filter-wrap');
+  const isOpen = wrap.classList.contains('open');
+  wrap.classList.toggle('open');
+  el('mob-filter-arrow').textContent = isOpen ? '▾' : '▴';
+});
+
+buildFilterTree('filter-tree-desktop');
+buildFilterTree('mob-filter-tree');
+
+/* ============================================================
+   CASCADE
+============================================================ */
+async function initMakeColumn() {
+  const listEl = el('list-make');
+  listEl.innerHTML = `<div class="cascade-spinner"><div class="spinner-border spinner-border-sm" role="status"></div></div>`;
+  listEl.classList.remove('disabled');
+
+  const makes = await api('/makes');
+  listEl.innerHTML = '';
+
+  const POPULAR_MAKES = ['TOYOTA','HOLDEN','MAZDA','FORD','HYUNDAI','MITSUBISHI'];
+
+  const hdr = document.createElement('div');
+  hdr.className = 'cascade-item c-header';
+  hdr.textContent = '— Popular Makes —';
+  listEl.appendChild(hdr);
+
+  // Live API returns [{text: "TOYOTA", vehicleId: "0"}, ...] — extract text values
+  // Filter out header items like "- Popular Makes -" and "- All Makes -"
+  const makeNames = makes
+    .map(m => typeof m === 'object' ? m.text : m)
+    .filter(m => m && !m.startsWith('-'));
+
+  POPULAR_MAKES.forEach(m => listEl.appendChild(makeCascadeItem(m, 'make')));
+
+  const div = document.createElement('div');
+  div.className = 'cascade-item c-divider';
+  listEl.appendChild(div);
+
+  makeNames.forEach(m => listEl.appendChild(makeCascadeItem(m, 'make')));
+}
+
+function makeCascadeItem(value, col, vehicleId) {
+  const d = document.createElement('div');
+  d.className = 'cascade-item';
+  d.textContent = value;
+  d.dataset.value = value;
+  if (vehicleId) d.dataset.vehicleId = vehicleId;
+  d.addEventListener('click', () => onCascadeSelect(col, value, vehicleId));
+  return d;
+}
+
+async function onCascadeSelect(col, value, vehicleId) {
+  S.cascade[col] = value;
+  if (col === 'details' && vehicleId) S.vehicleId = vehicleId;
+  const idx = COL_ORDER.indexOf(col);
+
+  for (let i = idx + 1; i < COL_ORDER.length; i++) resetCol(COL_ORDER[i]);
+  lockCol(col, value);
+
+  if (window.innerWidth <= 767) {
+    el('cc-' + col).classList.remove('mob-active');
+    const nextCol = COL_ORDER[idx + 1];
+    if (nextCol) { el('cc-' + nextCol).classList.add('mob-active'); updateMobProgress(nextCol); }
+  }
+
+  if (col === 'details') { await onVehicleSelected(); return; }
+
+  const next = COL_ORDER[idx + 1];
+  if (!next) return;
+
+  const nextList = el('list-' + next);
+  nextList.classList.remove('disabled');
+  nextList.innerHTML = `<div class="cascade-spinner"><div class="spinner-border spinner-border-sm" role="status"></div></div>`;
+
+  const params = { make:S.cascade.make, model:S.cascade.model, year:S.cascade.year, seriesChassis:S.cascade.chassis, engine:S.cascade.engine };
+  const endpointMap = { model:'/models', year:'/years', chassis:'/serieschassis', engine:'/engine', details:'/details' };
+
+  try {
+    const items = await api(endpointMap[next], params);
+    nextList.innerHTML = '';
+    if (!items || !items.length) {
+      nextList.innerHTML = '<div class="cascade-item c-header">No options available</div>';
+    } else {
+      items.forEach(item => {
+        const text = typeof item === 'object' ? item.text : item;
+        const vId  = typeof item === 'object' ? item.vehicleId : null;
+        nextList.appendChild(makeCascadeItem(text, next, vId));
+      });
+    }
+  } catch(err) {
+    nextList.innerHTML = '<div class="cascade-item c-header">Failed to load — please try again</div>';
+  }
+}
+
+function lockCol(col, value) {
+  el('locked-' + col).textContent = value;
+  el('locked-' + col).style.display = 'block';
+  el('change-' + col).style.display = 'inline';
+  el('list-' + col).style.display = 'none';
+}
+
+function unlockCol(col) {
+  el('locked-' + col).style.display = 'none';
+  el('locked-' + col).textContent = '';
+  el('change-' + col).style.display = 'none';
+  el('list-' + col).style.display = '';
+}
+
+function resetCol(col) {
+  el('locked-' + col).style.display = 'none';
+  el('locked-' + col).textContent = '';
+  el('change-' + col).style.display = 'none';
+  el('list-' + col).style.display = '';
+  el('list-' + col).classList.add('disabled');
+  el('list-' + col).innerHTML = '';
+  S.cascade[col] = null;
+}
+
+COL_ORDER.forEach(col => {
+  el('change-' + col).addEventListener('click', e => {
+    e.preventDefault();
+    unlockCol(col);
+    S.cascade[col] = null;
+    const idx = COL_ORDER.indexOf(col);
+    for (let i = idx + 1; i < COL_ORDER.length; i++) {
+      resetCol(COL_ORDER[i]);
+      el('cc-' + COL_ORDER[i]).classList.remove('mob-active');
+    }
+    if (window.innerWidth <= 767) { el('cc-' + col).classList.add('mob-active'); updateMobProgress(col); }
+    clearVehicle();
+  });
+});
+
+function updateMobProgress(col) {
+  const p = el('mob-cascade-progress');
+  if (p) p.textContent = `Step ${COL_STEP[col]} of 6: Select ${COL_LABEL[col]}`;
+}
+
+/* ============================================================
+   VEHICLE SELECTED
+============================================================ */
+async function onVehicleSelected() {
+  const { make, model, year, chassis, engine, details } = S.cascade;
+  S.vehicleLabel = `${make} ${model} ${year} — ${chassis} — ${engine} — ${details}`;
+
+  el('fmv-vehicle-label').textContent = S.vehicleLabel;
+  el('vc-id').value = S.vehicleId;
+
+  await loadVehicleParts(S.vehicleId);
+}
+
+async function loadVehicleParts(vehicleId) {
+  flexEl('vs-spinner');
+  hideEl('vs-results');
+  hideEl('vs-no-parts');
+  hideEl('vs-error');
+
+  try {
+    const res = await api('/parts', { vehicleId });
+    hideEl('vs-spinner');
+    const parts = res?.parts ?? res;
+    if (!parts || !parts.length) { showEl('vs-no-parts'); return; }
+    setVehicleParts(parts);
+    el('vs-results').style.display = 'flex';
+  } catch(err) {
+    hideEl('vs-spinner');
+    showEl('vs-error');
+  }
+}
+
+function setVehicleParts(parts) {
+  S.allParts     = parts;
+  S.activeFilter = null;
+  S.activeGroup  = null;
+  S.filterCats   = [...new Set(parts.map(p => p.subCatDescription || 'Other'))].sort();
+  buildFilterTree('filter-tree-desktop');
+  buildFilterTree('mob-filter-tree');
+  renderVehicleParts();
+}
+
+function renderVehicleParts() {
+  const container = el('vs-products');
+  container.innerHTML = '';
+  const visible = S.activeFilter
+    ? S.allParts.filter(p => (p.subCatDescription || 'Other') === S.activeFilter)
+    : S.activeGroup
+      ? S.allParts.filter(p => getCatGroup(p.subCatDescription) === S.activeGroup)
+      : S.allParts;
+  const groups = {};
+  visible.forEach(p => { const k = p.subCatDescription || 'Other'; if (!groups[k]) groups[k] = []; groups[k].push(p); });
+
+  Object.keys(groups).sort().forEach(cat => {
+    const catHdr = document.createElement('div');
+    catHdr.className = 'vs-cat-header';
+    catHdr.textContent = cat;
+    container.appendChild(catHdr);
+
+    const table = document.createElement('table');
+    table.className = 'vs-table';
+    table.innerHTML = `<colgroup><col class="col-brand"><col class="col-image"><col class="col-sku"><col class="col-desc"><col class="col-price"><col class="col-action"></colgroup>`;
+
+    const tbody = document.createElement('tbody');
+    groups[cat].forEach(part => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="brand-cell">
+          <img class="brand-logo" src="${part.brandLogoUrl || brandSVG(part.brand)}" alt="${esc(part.brand)}">
+        </td>
+        <td class="td-img" style="text-align:center;">
+          <img src="${part.thumbImageUrl ? esc(part.thumbImageUrl) : partSVG()}" alt="Product image" style="width:160px;height:160px;object-fit:contain;display:block;margin:auto;">
+        </td>
+        <td><span class="part-sku">${esc(part.partNo)}</span></td>
+        <td>
+          ${part.subCatDescription ? `<div class="part-category">${esc(part.subCatDescription)}</div>` : ''}
+          <div class="part-desc-link">${esc(part.title || part.longFootnote || part.subCatDescription)}</div>
+          ${part.title && part.longFootnote ? `<div class="part-autoinfo-desc">${esc(part.longFootnote)}</div>` : ''}
+          <div class="part-crossref">${esc(part.sku)}</div>
+        </td>
+        <td><span class="part-price">${(part.salePrice || part.price) ? '$' + (part.salePrice || part.price).toFixed(2) : ''}</span></td>
+        <td><button class="btn-add-cart">ADD TO CART</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    container.appendChild(table);
+  });
+}
+
+/* ============================================================
+   CLEAR VEHICLE
+============================================================ */
+function clearVehicle() {
+  S.vehicleId = null;
+  S.vehicleLabel = null;
+  S.activeFilter = null;
+  S.activeGroup  = null;
+  S.allParts     = [];
+  S.filterCats   = [];
+  el('fmv-vehicle-label').textContent = '';
+  el('vc-id').value = '';
+  hideEl('vs-results');
+  hideEl('vs-no-parts');
+  hideEl('vs-error');
+  hideEl('multi-vehicle-panel');
+}
+
+el('cascade-clear-btn').addEventListener('click', () => {
+  COL_ORDER.forEach((col, i) => {
+    if (i === 0) { unlockCol(col); }
+    else { resetCol(col); el('cc-' + col).classList.remove('mob-active'); }
+  });
+  S.cascade = { make:null, model:null, year:null, chassis:null, engine:null, details:null };
+  el('cc-make').classList.add('mob-active');
+  clearVehicle();
+  initMakeColumn();
+  updateMobProgress('make');
+});
+
+/* ============================================================
+   REGO SEARCH (FMV sub-bar)
+============================================================ */
+el('fmv-search-btn').addEventListener('click', async () => {
+  const plate  = el('fmv-plate').value.trim().toUpperCase();
+  const place  = el('fmv-place').value;
+  const partno = el('fmv-partno').value.trim().toUpperCase();
+
+  if (partno) {
+    clearVehicle();
+    COL_ORDER.forEach((col, i) => {
+      if (i === 0) { unlockCol(col); }
+      else { resetCol(col); el('cc-' + col).classList.remove('mob-active'); }
+    });
+    S.cascade = { make:null, model:null, year:null, chassis:null, engine:null, details:null };
+    el('cc-make').classList.add('mob-active');
+    initMakeColumn();
+    updateMobProgress('make');
+    showCascade(false);
+    el('tab-vs').classList.add('pns-active');
+    el('fmv-plate').value = '';
+    el('fmv-place').value = '';
+    el('tab-pns').style.display = 'block';
+    el('pns-input').value = partno;
+    el('tab-pns').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    await doPNS(partno);
+    return;
+  }
+
+  if (!plate || !place) { alert('Please enter a REGO number and select a state.'); return; }
+  el('pns-input').value = '';
+  hideEl('pns-results');
+  hideEl('pns-error');
+  hideEl('pns-no-results');
+  el('veh-app-panel').style.display = 'none';
+  el('tab-pns').style.display = 'none';
+  el('tab-vs').classList.remove('pns-active');
+  await doRegoSearch(plate, place);
+});
+
+async function doRegoSearch(plate, place) {
+  clearVehicle();
+  flexEl('vs-spinner');
+  hideEl('vs-error');
+  hideEl('vs-no-parts');
+
+  try {
+    const result = await api('/rego', { plate, place });
+    hideEl('vs-spinner');
+
+    if (!result) {
+      el('vs-no-parts').textContent = `No vehicle found for "${plate}" (${place.replace('AU-','').replace('NZ-','NZ')}).`;
+      showEl('vs-no-parts');
+      return;
+    }
+
+    if (Array.isArray(result)) { showMultipleVehicles(result); return; }
+    await autoFillCascadeFromRego(result);
+
+  } catch(err) {
+    hideEl('vs-spinner');
+    showEl('vs-error');
+  }
+}
+
+async function autoFillCascadeFromRego(vehicle) {
+  const map = { make:vehicle.make, model:vehicle.model, year:vehicle.year, chassis:vehicle.chassis, engine:vehicle.engine, details:vehicle.details };
+  COL_ORDER.forEach(col => { if (map[col]) { S.cascade[col] = map[col]; lockCol(col, map[col]); } });
+
+  const label = (vehicle.chassis && vehicle.engine && vehicle.details)
+    ? `${vehicle.make} ${vehicle.model} ${vehicle.year} — ${vehicle.chassis} — ${vehicle.engine} — ${vehicle.details}`
+    : vehicle.label || `${vehicle.make} ${vehicle.model} ${vehicle.year}`;
+  S.vehicleLabel = label;
+  S.vehicleId    = vehicle.id;
+
+  el('fmv-vehicle-label').textContent = label;
+  el('vc-id').value = vehicle.id;
+
+  await loadVehicleParts(vehicle.id);
+}
+
+function showMultipleVehicles(vehicles) {
+  const list = el('multi-vehicle-list');
+  list.innerHTML = '';
+  vehicles.forEach((v, i) => {
+    const d = document.createElement('div');
+    d.className = 'multi-vehicle-opt';
+    d.innerHTML = `<input type="radio" name="mvsel" id="mv${i}" value="${esc(v.id)}"><label for="mv${i}">${esc(v.label)}</label>`;
+    d.querySelector('input').addEventListener('change', async () => {
+      el('multi-vehicle-panel').style.display = 'none';
+      await autoFillCascadeFromRego({ id:v.id, label:v.label, make:'', model:'', year:'', chassis:'', engine:'', details:'' });
+    });
+    list.appendChild(d);
+  });
+  el('multi-vehicle-panel').style.display = 'block';
+}
+
+/* ============================================================
+   FMV CLEAR
+============================================================ */
+el('fmv-clear-btn').addEventListener('click', () => {
+  el('fmv-plate').value  = '';
+  el('fmv-place').value  = '';
+  el('fmv-partno').value = '';
+  showCascade(true);
+  el('tab-vs').classList.remove('pns-active');
+
+  COL_ORDER.forEach((col, i) => {
+    if (i === 0) { unlockCol(col); }
+    else { resetCol(col); el('cc-' + col).classList.remove('mob-active'); }
+  });
+  S.cascade = { make:null, model:null, year:null, chassis:null, engine:null, details:null };
+  el('cc-make').classList.add('mob-active');
+  clearVehicle();
+  initMakeColumn();
+  updateMobProgress('make');
+
+  el('pns-input').value = '';
+  hideEl('pns-results');
+  hideEl('pns-error');
+  hideEl('pns-no-results');
+  el('veh-app-panel').style.display = 'none';
+  el('tab-pns').style.display = 'none';
+});
+
+el('fmv-partno').addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\s/g, '').toUpperCase();
+});
+
+/* ============================================================
+   PART NUMBER SEARCH
+============================================================ */
+
+async function doPNS(partno) {
+  hideEl('pns-results');
+  hideEl('pns-error');
+  hideEl('pns-no-results');
+  el('veh-app-panel').style.display = 'none';
+  flexEl('pns-spinner');
+
+  try {
+    const results = await api('/parts/search', { partno });
+    hideEl('pns-spinner');
+    if (!results || !results.parts || !results.parts.length) { showEl('pns-no-results'); return; }
+    renderPNS(results.parts);
+    showEl('pns-results');
+  } catch(err) {
+    hideEl('pns-spinner');
+    showEl('pns-error');
+  }
+}
+
+function renderPNS(parts) {
+  const tbody = el('pns-tbody');
+  tbody.innerHTML = '';
+  parts.forEach(part => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="brand-cell">
+        <img class="brand-logo" src="${part.brandLogoUrl || brandSVG(part.brand)}" alt="${esc(part.brand)}">
+      </td>
+      <td class="td-img" style="text-align:center;vertical-align:middle;">
+        <img src="${part.thumbImageUrl ? esc(part.thumbImageUrl) : partSVG()}" alt="Product image" style="width:160px;height:160px;object-fit:contain;display:block;margin:auto;">
+      </td>
+      <td style="text-align:center;vertical-align:middle;"><span class="part-sku">${esc(part.partNo)}</span></td>
+      <td>
+        ${part.subCatDescription ? `<div class="part-category">${esc(part.subCatDescription)}</div>` : ''}
+        <div class="part-desc-link">${esc(part.title || part.longFootnote || part.subCatDescription)}</div>
+        ${part.title && part.longFootnote ? `<div class="part-autoinfo-desc">${esc(part.longFootnote)}</div>` : ''}
+        ${part.sku ? `<div class="part-crossref">${esc(part.sku)}</div>` : ''}
+      </td>
+      <td class="td-price"><span class="part-price">${(part.salePrice || part.price) ? '$' + (part.salePrice || part.price).toFixed(2) : ''}</span></td>
+      <td class="td-actions" style="min-width:148px;">
+        <button class="btn-add-cart">ADD TO CART</button>
+        <button class="btn-veh-app" data-aapi="${esc(part.aapi || part.partNo || '')}">VEHICLE APPLICATIONS</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.btn-veh-app').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const wasActive = btn.classList.contains('active');
+      tbody.querySelectorAll('.btn-veh-app').forEach(b => b.classList.remove('active'));
+      if (wasActive) { el('veh-app-panel').style.display = 'none'; return; }
+      btn.classList.add('active');
+      await loadVehicleApps(btn.dataset.aapi);
+    });
+  });
+}
+
+/* ============================================================
+   VEHICLE APPLICATIONS
+============================================================ */
+async function loadVehicleApps(gtin) {
+  const panel  = el('veh-app-panel');
+  const list   = el('veh-app-list');
+  const pagNav = el('veh-app-pag-nav');
+
+  panel.style.display = 'block';
+  list.innerHTML = `<div style="display:flex;justify-content:center;padding:16px;"><div class="spinner-border spinner-border-sm" role="status"></div></div>`;
+  pagNav.style.display = 'none';
+
+  try {
+    const apps = await api('/vehicle-apps', { aapi: gtin });
+    S.vehApp = { gtin, data:apps, page:1, perPage:5 };
+    renderVehAppPage();
+  } catch(err) {
+    list.innerHTML = '<div class="alert alert-danger">Failed to load vehicle applications.</div>';
+  }
+}
+
+function renderVehAppPage() {
+  const { data, page, perPage } = S.vehApp;
+  const list   = el('veh-app-list');
+  const pagNav = el('veh-app-pag-nav');
+  const pagEl  = el('veh-app-pagination');
+
+  const total = Math.ceil(data.length / perPage);
+  const start = (page - 1) * perPage;
+
+  list.innerHTML = '';
+  data.slice(start, start + perPage).forEach(app => {
+    const d = document.createElement('div');
+    d.className = 'veh-app-row';
+    d.textContent = app.label || app;
+    list.appendChild(d);
+  });
+
+  if (total <= 1) { pagNav.style.display = 'none'; return; }
+  pagNav.style.display = 'block';
+  pagEl.innerHTML = '';
+
+  const addLi = (label, pg, disabled, active) => {
+    const li = document.createElement('li');
+    li.className = 'page-item' + (disabled ? ' disabled':'') + (active ? ' active':'');
+    li.innerHTML = `<a class="page-link" href="#">${esc(label)}</a>`;
+    if (!disabled) li.addEventListener('click', e => { e.preventDefault(); S.vehApp.page = pg; renderVehAppPage(); });
+    pagEl.appendChild(li);
+  };
+
+  addLi('Previous', page - 1, page === 1, false);
+  for (let i = 1; i <= total; i++) addLi(i, i, false, i === page);
+  addLi('Next', page + 1, page === total, false);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+initMakeColumn();
+updateMobProgress('make');
+
+el('fmv-plate').addEventListener('keydown',  e => { if(e.key==='Enter') el('fmv-search-btn').click(); });
+el('fmv-partno').addEventListener('keydown', e => { if(e.key==='Enter') el('fmv-search-btn').click(); });
+
+el('fmv-plate').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/[\s-]/g, '').toUpperCase();
+  if (el('fmv-partno').value) {
+    el('fmv-partno').value = '';
+    showCascade(true);
+  }
+});
+
+el('fmv-partno').addEventListener('input', () => {
+  showCascade(!el('fmv-partno').value.trim());
+});
+
+function showCascade(show) {
+  el('cascade-grid').style.display                    = show ? '' : 'none';
+  el('cascade-clear-btn').parentElement.style.display = show ? '' : 'none';
+}
+
+/* ============================================================
+   AUTO-TRIGGER FROM URL PARAMS (home REGO search handoff)
+============================================================ */
+(function autoTriggerFromURL() {
+  const params     = new URLSearchParams(window.location.search);
+  const searchType = params.get('searchType');
+  const plate      = (params.get('plate') || '').trim().toUpperCase();
+  const place      = params.get('place') || '';
+
+  if (searchType === 'regoSearch' && plate && place) {
+    // Pre-fill sub-bar fields
+    el('fmv-plate').value = plate;
+    el('fmv-place').value = place;
+
+    // Fire the REGO search automatically after cascade init settles
+    setTimeout(() => doRegoSearch(plate, place), 300);
+  }
+})();
+</script>
+</body>
+</html>
